@@ -10,11 +10,11 @@ public class Asg1 {
   /**
    * Prints a graph (2D int array) row by row
    */
-  public static void printGraph(int[][] graph) {
-    for (int i = 0; i < graph.length; i++) {
-      String [] row = new String[graph.length];
-      for (int j = 0; j < graph.length; j++) {
-        row[j] = graph[i][j] + "";
+  public static void printGraph(Graph graph) {
+    for (int i = 0; i < graph.size(); i++) {
+      String [] row = new String[graph.size()];
+      for (int j = 0; j < graph.size(); j++) {
+        row[j] = graph.getEdge(i,  j) + "";
       }
       System.out.println(String.join(" ", row));
     }
@@ -23,7 +23,7 @@ public class Asg1 {
   /**
    * Reads graphs from a given file name
    */
-	public static ArrayList<int[][]> readFile(String fname) {
+	public static ArrayList<Graph> readFile(String fname) {
 	  int numNodes;
 	  
 	  // Open file for viewing
@@ -35,7 +35,7 @@ public class Asg1 {
       System.exit(0);
     }
 		
-		ArrayList<int[][]> graphs = new ArrayList<int[][]>();
+		ArrayList<Graph> graphs = new ArrayList<Graph>();
 		
 		// Read in multiple graphs
 		while (reader.hasNextLine()) {
@@ -45,19 +45,19 @@ public class Asg1 {
 	    numNodes = Integer.parseInt(line);
 	    
 	    // 2-D array to represent graph matrix
-	    int[][] graph = new int[numNodes][numNodes];
+	    int[][] matrix = new int[numNodes][numNodes];
 	    
 	    // read each line of the matrix
-	    for(int i = 0; i < graph.length; i++) {
+	    for(int i = 0; i < matrix.length; i++) {
 	      line = reader.nextLine();
 	      String [] parts = line.split(" ");
 	      for (int j = 0; j < parts.length; j++) {
-	        graph[i][j] = Integer.parseInt(parts[j]);
+	        matrix[i][j] = Integer.parseInt(parts[j]);
 	      }
 	    }
+	    Graph graph = new Graph(matrix);
 	    graphs.add(graph);
 		}
-		
 		return graphs;
 	}
 
@@ -65,17 +65,17 @@ public class Asg1 {
 	  
 	  // Accepts a graphs file name as the first and only arg
 		if (args.length != 1) {
-			System.out.println("Please provide a file name containing a graph matrix.");
+			System.out.println("Please provide a file name contaiby referencening a graph matrix.");
 			System.exit(0);
 		}
 		String fname = args[0];
 		
 		// read graphs from file
-		ArrayList<int[][]> graphs = readFile(fname);
+		ArrayList<Graph> graphs = readFile(fname);
 		
 		// print all graphs to console
 		int i = 0;
-		for (int[][] graph : graphs) {
+		for (Graph graph : graphs) {
 		  i++;
 		  System.out.println(">>> Graph " + i);
 	    printGraph(graph);
