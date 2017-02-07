@@ -20,11 +20,19 @@ public class Graph {
     this.matrix = new int[data.length][data.length];
     for (int i = 0; i < data.length; i++) {
       for (int j = 0; j < data.length; j++) {
-        this.matrix[i][j] = data[i][j];
+        // automatically remove self-loops
+        if (i == j) {
+          this.matrix[i][j] = 0;
+        } else {
+          this.matrix[i][j] = data[i][j];
+        }
       }
     }
   }
   
+  /**
+   * Get the size of the graph
+   */
   public int size() {
     return this.matrix.length;
   }
@@ -57,6 +65,18 @@ public class Graph {
     this.matrix[i][j] = val;
   }
   
+  // Get a list of all other nodes that a node is connected to
+  private ArrayList<Integer> adjacentNodes(int n) {
+    ArrayList<Integer> sinks = new ArrayList<Integer>();
+    
+    for (int j = 0; j < this.size(); j++) {
+      if (this.getEdge(n, j) == 1) {
+        sinks.add(j);
+      }
+    }
+    return sinks;
+  }
+  
   /**
    * Get all K-Cliques in the graph
    * @param k
@@ -65,6 +85,17 @@ public class Graph {
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
   public ArrayList<int[]> findKCliques(int k) {
+    
+    for (int n = 0; n < this.size(); n++) {
+      ArrayList<Integer> adjNodes = this.adjacentNodes(n);
+      
+      for (int i = 0; i < adjNodes.size(); i++) {
+        for (int j = 0; j < adjNodes.size(); j++) {
+          
+        }
+      }
+    }
+    
     return null;
   }
   
