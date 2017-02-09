@@ -47,7 +47,7 @@ public class Graph {
   }
   
   /**
-   * Set an edge value in the matrix
+   * Set an edge v5alue in the matrix
    */
   public void setEdge(int i, int j, int val) {
     if ((i < 0 || i > 1) || (j < 0 || j > 1)) {
@@ -68,7 +68,32 @@ public class Graph {
     return null;
   }
   
+  /**
+   * Will return the copliment of a graph 
+   * @return The compliment 
+   */
   public Graph getComplement() {
-    return null;
+	Graph compliment = new Graph(this.matrix);
+	for(int i = 0; i < this.matrix.length; i++)
+	{
+		for(int j = 0; j < this.matrix.length; j++)
+		{
+			if(i == j)
+			{
+				compliment.setEdge(i, j, 1);
+			}
+			else if(compliment.getEdge(i,j) == 0)
+			{
+				compliment.setEdge(i, j, 1);
+			}
+			else if(compliment.getEdge(i,j) == 1)
+			{
+				compliment.setEdge(i, j, 0);
+			}
+		}
+	}
+	
+	
+    return compliment;
   }
 }
