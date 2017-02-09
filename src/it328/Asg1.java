@@ -79,6 +79,8 @@ public class Asg1 {
       i++;
       System.out.println(">>> Graph " + i);
       printGraph(graph);
+      graph.findKCliques();
     }
+    
   }
 }

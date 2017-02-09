@@ -1,6 +1,7 @@
 package it328;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class Graph {
   
@@ -77,6 +78,51 @@ public class Graph {
     return sinks;
   }
   
+  private void findCliques(ArrayList<ArrayList<Integer>> found, ArrayList<Integer> potentialClique,
+                                                    ArrayList<Integer> remainingNodes, ArrayList<Integer> skipNodes) {
+    if (remainingNodes.size() == 0 && skipNodes.size() == 0) {
+      found.add(potentialClique);
+      for (int j = 0; j < potentialClique.size(); j++) {
+        System.out.println(potentialClique.get(j));
+      }
+      System.out.println();
+      return;
+    }
+    
+    for (int n = 0; n < remainingNodes.size(); n++) {
+//      System.out.println(n);
+      System.out.println("n: " + n);
+      ArrayList<Integer> neighbors = this.adjacentNodes(n);
+      for (int j = 0; j < neighbors.size(); j++) {
+        System.out.println(neighbors.get(j));
+      }
+      
+      // Add current node to potential nodes
+      ArrayList<Integer> newPotential = (ArrayList<Integer>)potentialClique.clone();
+      newPotential.add(n);
+      
+      // Filter remaining nodes by if they're in the current node's neighbors
+      ArrayList<Integer> newRemaining = new ArrayList<Integer>();
+      for (int n2 : remainingNodes) {
+        if (neighbors.contains(n2)) {
+          newRemaining.add(n2);
+        }
+      }
+      
+      // Filter skip nodes by if they're in the current node's neighbors
+      ArrayList<Integer> newSkips = new ArrayList<Integer>();
+      for (int n2 : skipNodes) {
+        if (neighbors.contains(n2)) {
+          newSkips.add(n2);
+        }
+      }
+      
+      this.findCliques(found, newPotential, newRemaining, newSkips);
+      
+      remainingNodes.remove(n);
+      skipNodes.add(n);
+    }
+  }
   /**
    * Get all K-Cliques in the graph
    * @param k
@@ -84,19 +130,24 @@ public class Graph {
    * @return
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
-  public ArrayList<int[]> findKCliques(int k) {
+  public ArrayList<ArrayList<Integer>> findKCliques() {
     
-    for (int n = 0; n < this.size(); n++) {
-      ArrayList<Integer> adjNodes = this.adjacentNodes(n);
-      
-      for (int i = 0; i < adjNodes.size(); i++) {
-        for (int j = 0; j < adjNodes.size(); j++) {
-          
-        }
-      }
+    ArrayList<ArrayList<Integer>> cliques = new ArrayList<ArrayList<Integer>>();
+    ArrayList<Integer> nodeList = new ArrayList<Integer>();
+    for (int i = 0; i < this.size(); i++) {
+      nodeList.add(i);
     }
     
-    return null;
+    this.findCliques(cliques, new ArrayList<Integer>(), nodeList, new ArrayList<Integer>());
+    
+    for (int i = 0; i < cliques.size(); i++) {
+      for (int j = 0; j < cliques.get(i).size(); j++) {
+        System.out.print(cliques.get(i).get(j));
+      }
+      System.out.println();
+    }
+    
+    return cliques;
   }
   
   /**
