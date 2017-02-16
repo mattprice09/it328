@@ -73,14 +73,14 @@ public class Asg1 {
     // read graphs from file
     ArrayList<Graph> graphs = readFile(fname);
     
-    // print all graphs to console
+    // test 
     int i = 0;
     for (Graph graph : graphs) {
       i++;
       System.out.println(">>> Graph " + i);
       printGraph(graph);
-      graph.findKCliques();
+      ArrayList<ArrayList<Integer>> cliques = graph.findKCliques();
+      ArrayList<Integer> maxClique = graph.maxClique(cliques);
     }
-    
   }
 }

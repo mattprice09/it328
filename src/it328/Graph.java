@@ -56,7 +56,7 @@ public class Graph {
   }
   
   /**
-   * Set an edge v5alue in the matrix
+   * Set an edge value in the matrix
    */
   public void setEdge(int i, int j, int val) {
     if ((i < 0 || i > 1) || (j < 0 || j > 1)) {
@@ -78,28 +78,21 @@ public class Graph {
     return sinks;
   }
   
+  // Recursive method used to find all K-cliques
   private void findCliques(ArrayList<ArrayList<Integer>> found, ArrayList<Integer> potentialClique,
                                                     ArrayList<Integer> remainingNodes, ArrayList<Integer> skipNodes) {
     if (remainingNodes.size() == 0 && skipNodes.size() == 0) {
       found.add(potentialClique);
-      for (int j = 0; j < potentialClique.size(); j++) {
-        System.out.println(potentialClique.get(j));
-      }
-      System.out.println();
       return;
     }
     
     for (int n = 0; n < remainingNodes.size(); n++) {
-//      System.out.println(n);
-      System.out.println("n: " + n);
-      ArrayList<Integer> neighbors = this.adjacentNodes(n);
-      for (int j = 0; j < neighbors.size(); j++) {
-        System.out.println(neighbors.get(j));
-      }
+      int node = remainingNodes.get(n);
+      ArrayList<Integer> neighbors = this.adjacentNodes(node);
       
       // Add current node to potential nodes
       ArrayList<Integer> newPotential = (ArrayList<Integer>)potentialClique.clone();
-      newPotential.add(n);
+      newPotential.add(node);
       
       // Filter remaining nodes by if they're in the current node's neighbors
       ArrayList<Integer> newRemaining = new ArrayList<Integer>();
@@ -120,7 +113,7 @@ public class Graph {
       this.findCliques(found, newPotential, newRemaining, newSkips);
       
       remainingNodes.remove(n);
-      skipNodes.add(n);
+      skipNodes.add(node);
     }
   }
   /**
@@ -140,42 +133,51 @@ public class Graph {
     
     this.findCliques(cliques, new ArrayList<Integer>(), nodeList, new ArrayList<Integer>());
     
-    for (int i = 0; i < cliques.size(); i++) {
-      for (int j = 0; j < cliques.get(i).size(); j++) {
-        System.out.print(cliques.get(i).get(j));
-      }
-      System.out.println();
-    }
-    
     return cliques;
   }
-  
+
   /**
-   * Will return the copliment of a graph 
+   * Will return the compliment of a graph 
    * @return The compliment 
    */
   public Graph getComplement() {
-	Graph compliment = new Graph(this.matrix);
-	for(int i = 0; i < this.matrix.length; i++)
-	{
-		for(int j = 0; j < this.matrix.length; j++)
-		{
-			if(i == j)
-			{
-				compliment.setEdge(i, j, 1);
-			}
-			else if(compliment.getEdge(i,j) == 0)
-			{
-				compliment.setEdge(i, j, 1);
-			}
-			else if(compliment.getEdge(i,j) == 1)
-			{
-				compliment.setEdge(i, j, 0);
-			}
-		}
-	}
-	
-	
+    Graph compliment = new Graph(this.matrix);
+    for(int i = 0; i < this.matrix.length; i++) {
+      for(int j = 0; j < this.matrix.length; j++)
+      {
+        if(i == j)
+        {
+          compliment.setEdge(i, j, 1);
+        }
+        else if(compliment.getEdge(i,j) == 0)
+        {
+          compliment.setEdge(i, j, 1);
+        }
+        else if(compliment.getEdge(i,j) == 1)
+        {
+          compliment.setEdge(i, j, 0);
+        }
+      }
+    }
     return compliment;
+  }
+  
+  /**
+   * Get the biggest clique from a list of all cliques of the graph
+   * @param cliques
+   *    The list of cliques found from findKCliques()
+   * @return
+   *    An ArrayList containing all integers in the max clique
+   */
+  public ArrayList<Integer> maxClique(ArrayList<ArrayList<Integer>> cliques) {
+    int ind = 0;
+    int high = cliques.get(0).size();
+    for (int i = 1; i < cliques.size(); i++) {
+      if (cliques.get(i).size() > high) {
+        ind = i;
+        high = cliques.get(i).size();
+      }
+    }
+    return cliques.get(ind);
   }
 }
