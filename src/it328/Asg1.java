@@ -202,14 +202,15 @@ public class Asg1 {
   public static void main(String[] args) {
     
     // Accepts a graphs file name as the first and only arg
-    /*if (args.length != 1) {
+    if (args.length != 1) {
       System.out.println("Please provide a file name contaiby referencening a graph matrix.");
       System.exit(0);
-    }*/
-    String fname = "cnfs16.txt";
+    }
+    String fname = args[0];
     
     // read graphs from file
     ArrayList<Graph> graphs = read3CNF(fname);
+//    ArrayList<Graph> graphs = readFile(fname);
     int i = 0;
     for (Graph graph : graphs) {
       i++;
@@ -217,6 +218,7 @@ public class Asg1 {
       printGraph(graph);
       ArrayList<ArrayList<Integer>> cliques = graph.findKCliques();
       ArrayList<Integer> maxClique = graph.maxClique(cliques);
+      System.out.println(maxClique);
     }
   }
 }
