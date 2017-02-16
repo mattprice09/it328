@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Graph {
   
   private int[][] matrix;
+  private ArrayList<Integer> nodeList;
   
   /**
    * Default constructor
@@ -28,6 +29,26 @@ public class Graph {
         }
       }
     }
+  }
+  
+  /**
+   * Constructor for 3CNF graphs
+   */
+  public Graph(int[][] data, ArrayList<Integer> nodeList)
+  {
+	  this.matrix = new int[data.length][data.length];
+	  this.nodeList = nodeList;
+	    for (int i = 0; i < data.length; i++) {
+	      for (int j = 0; j < data.length; j++) {
+	        // automatically remove self-loops
+	        if (i == j) {
+	          this.matrix[i][j] = 0;
+	        } else {
+	          this.matrix[i][j] = data[i][j];
+	        }
+	      }
+	    } 
+	  
   }
   
   /**
@@ -68,7 +89,6 @@ public class Graph {
   // Get a list of all other nodes that a node is connected to
   private ArrayList<Integer> adjacentNodes(int n) {
     ArrayList<Integer> sinks = new ArrayList<Integer>();
-    
     for (int j = 0; j < this.size(); j++) {
       if (this.getEdge(n, j) == 1) {
         sinks.add(j);
@@ -88,7 +108,6 @@ public class Graph {
     
     for (int n = 0; n < this.size(); n++) {
       ArrayList<Integer> adjNodes = this.adjacentNodes(n);
-      
       for (int i = 0; i < adjNodes.size(); i++) {
         for (int j = 0; j < adjNodes.size(); j++) {
           
@@ -100,7 +119,7 @@ public class Graph {
   }
   
   /**
-   * Will return the copliment of a graph 
+   * Will return the compliment of a graph 
    * @return The compliment 
    */
   public Graph getComplement() {
@@ -123,7 +142,6 @@ public class Graph {
 			}
 		}
 	}
-	
 	
     return compliment;
   }
