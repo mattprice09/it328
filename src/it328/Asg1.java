@@ -218,5 +218,6 @@ public class Asg1 {
       System.out.println(">>> Graph " + i);
       printGraph(graphs.get(i));
     }
+    
   }
 }
