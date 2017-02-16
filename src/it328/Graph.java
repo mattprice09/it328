@@ -6,6 +6,7 @@ import java.util.Set;
 public class Graph {
   
   private int[][] matrix;
+  private ArrayList<Integer> nodeList;
   
   /**
    * Default constructor
@@ -29,6 +30,26 @@ public class Graph {
         }
       }
     }
+  }
+  
+  /**
+   * Constructor for 3CNF graphs
+   */
+  public Graph(int[][] data, ArrayList<Integer> nodeList)
+  {
+	  this.matrix = new int[data.length][data.length];
+	  this.nodeList = nodeList;
+	    for (int i = 0; i < data.length; i++) {
+	      for (int j = 0; j < data.length; j++) {
+	        // automatically remove self-loops
+	        if (i == j) {
+	          this.matrix[i][j] = 0;
+	        } else {
+	          this.matrix[i][j] = data[i][j];
+	        }
+	      }
+	    } 
+	  
   }
   
   /**
@@ -69,7 +90,6 @@ public class Graph {
   // Get a list of all other nodes that a node is connected to
   private ArrayList<Integer> adjacentNodes(int n) {
     ArrayList<Integer> sinks = new ArrayList<Integer>();
-    
     for (int j = 0; j < this.size(); j++) {
       if (this.getEdge(n, j) == 1) {
         sinks.add(j);
@@ -124,7 +144,6 @@ public class Graph {
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
   public ArrayList<ArrayList<Integer>> findKCliques() {
-    
     ArrayList<ArrayList<Integer>> cliques = new ArrayList<ArrayList<Integer>>();
     ArrayList<Integer> nodeList = new ArrayList<Integer>();
     for (int i = 0; i < this.size(); i++) {
