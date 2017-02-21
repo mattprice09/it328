@@ -38,7 +38,10 @@ public class Graph {
   public Graph(int[][] data, ArrayList<Integer> nodeList)
   {
 	  this.matrix = new int[data.length][data.length];
+	  
+	  // deepcopy instead of assign
 	  this.nodeList = nodeList;
+	  
 	    for (int i = 0; i < data.length; i++) {
 	      for (int j = 0; j < data.length; j++) {
 	        // automatically remove self-loops
@@ -49,7 +52,6 @@ public class Graph {
 	        }
 	      }
 	    } 
-	  
   }
   
   /**
@@ -144,6 +146,7 @@ public class Graph {
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
   public ArrayList<ArrayList<Integer>> findKCliques() {
+    
     ArrayList<ArrayList<Integer>> cliques = new ArrayList<ArrayList<Integer>>();
     ArrayList<Integer> nodeList = new ArrayList<Integer>();
     for (int i = 0; i < this.size(); i++) {
