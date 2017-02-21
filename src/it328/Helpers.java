@@ -88,6 +88,7 @@ public class Helpers {
       ArrayList<Integer> nodeList = new ArrayList<Integer>();
       ArrayList<Integer> nodeListTemp = new ArrayList<Integer>();
       ArrayList<Integer []> clauses = new ArrayList<Integer []>();
+      ArrayList<Integer []> newClauses;
       int [][] matrix;
       
       
@@ -110,22 +111,34 @@ public class Helpers {
         	for(int k = 0; k < 3; k ++)
         	{
         		temp[k] = nodeList.get(i);
-        		System.out.print(temp[k]);
         		i++;
         	}
-        	System.out.print("\n");
+        	
         	clauses.add(temp);
         }
+       
+        newClauses = simplify3CNF(clauses);
         
-        nodeListTemp = simplify3CNF(nodeList, clauses);
-        for(int i = 0; i < nodeList.size(); i++)
+        //rebuilding nodeList from simplified 3CNF
+        
+        for(int i = 0; i < newClauses.size(); i++)
         {
-        	nodeList.set(i,nodeListTemp.get(i));
+        	Integer [] temp = newClauses.get(i);
+        	for(int k = 0; k < 3; k++)
+        	{
+        		nodeListTemp.add(temp[k]);
+        	}
         }
+        
+       //transferring nodeListTemp to nodeList
+        /*for(int i = 0; i < nodeList.size(); i++)
+        {
+        	nodeList.set(i, nodeListTemp.get(i));
+        }*/
         
         matrix = new int[nodeList.size()][nodeList.size()];
         
-        Graph graph = buildCNFgraph(matrix, nodeList, clauses);
+        Graph graph = buildCNFgraph(matrix, nodeListTemp, clauses);
         graph.setNRange(nRange);
         graphs.add(graph); 
       }
@@ -134,13 +147,44 @@ public class Helpers {
   }
   
   /**
-   * Will eliminate redundant terms in a single clause for the 3cnf statement
+   * Will eliminate redundant terms in a single clause for the 3cnf statement.
+   * Any redundancy will be replaced with a zero.
    */
   
-  private static ArrayList<Integer> simplify3CNF(ArrayList<Integer> nodeList, ArrayList<Integer []> clauses)
+  private static ArrayList<Integer []> simplify3CNF(ArrayList<Integer []> clauses)
   {
-	 
-	 return null; 
+	  ArrayList<Integer []> newClauses = new ArrayList<Integer []>();
+	 for(int i = 0; i < clauses.size(); i++)
+	 {
+		 Integer [] temp = clauses.get(i);
+		 if(temp[0] == temp[1] && temp[0] == temp[2])
+		 {
+			 temp[1] = 0;
+			 temp[2] = 0;
+			 newClauses.add(temp);
+		 }
+		 else if(temp[0] == temp[1])//inside 2 terms
+		 {
+			 temp[1] = temp[2];
+			 temp[2] = 0;
+			 newClauses.add(temp);
+		 }
+		 else if(temp[0] == temp [2])//outside 2 terms
+		 {
+			 temp[2] = 0;
+			 newClauses.add(temp);
+		 }
+		 else if(temp[1] == temp[2])//last 2 terms
+		 {
+			 temp[2] = 0;
+			 newClauses.add(temp);
+		 }
+		 else
+		 {
+			 newClauses.add(temp);
+		 }
+	 }
+	 return newClauses; 
   }
   
   /**
@@ -158,34 +202,40 @@ public class Helpers {
     //copying clauses array
     for(int i = 0; i < matrix.length; i++)
     {
-      for(int j = 0; j<matrix.length; j++)
-      {
-        node = nodeList.get(i);
-        node_j = nodeList.get(j);
+    	node = nodeList.get(i);
+    	
+    	for(int j = 0; j<matrix.length; j++)
+    	{
         
-        if(clauseFlag == 1)
-        {
-          //cannot have edge with nodes in front of it by 2
+    		node_j = nodeList.get(j);
+        
+    		if(clauseFlag == 1)
+    		{
+    			//cannot have edge with nodes in front of it by 2
           
-          if(i == j)//cannot have edge to itself in the same clause
-          {
-            matrix[i][j] = 0;
-          }
-          else if((i == j +2) || (i == j + 1))//checking the 2 in front
-          {
-            matrix[i][j] = 0;
-          }
-          else if((node + node_j) == 0)//cannot have edge with negation
-          {
-            matrix[i][j] = 0;
-          }
-          else
-          {
-            matrix[i][j] = 1;
-          }
+    			if(i == j)//cannot have edge to itself in the same clause
+    			{
+    				matrix[i][j] = 0;
+    			}
+    			else if(node == 0 || node_j == 0)//will not create edges with zero nodes
+    			{
+    				matrix[i][j] = 0;
+    			}
+    			else if((i == j +2) || (i == j + 1))//checking the 2 in front
+    			{
+    				matrix[i][j] = 0;
+    			}
+    			else if((node + node_j) == 0)//cannot have edge with negation
+    			{
+    				matrix[i][j] = 0;
+    			}
+    			else
+    			{
+    				matrix[i][j] = 1;
+    			}
           
-          clauseFlag = 2;
-        }
+    			clauseFlag = 2;
+    		}
         else if(clauseFlag == 2)
         {
           //cannot have edge with nodes 1 in front or 1 in behind
@@ -194,6 +244,10 @@ public class Helpers {
           {
             matrix[i][j] = 0;
           }
+          else if(node == 0 || node_j == 0)//will not create edges with zero nodes
+		  {
+				matrix[i][j] = 0;
+		  }
           else if((i == j + 1) || (i == j - 1))//checking 1 in front and 1 in back
           {
             matrix[i][j] = 0;
@@ -216,6 +270,10 @@ public class Helpers {
           {
             matrix[i][j] = 0;
           }
+          else if(node == 0 || node_j == 0)//will not create edges with zero nodes
+		  {
+				matrix[i][j] = 0;
+		  }
           else if((i == j - 1) || (i == j - 2))//checking the two nodes behind it
           {
             matrix[i][j] = 0;

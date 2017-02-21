@@ -17,8 +17,9 @@ public class solve3CNF {
     ArrayList<Graph> graphs = Helpers.read3CNF(fname);
     
     System.out.printf("* Solve 3CNF in %s: (reduced to K-Clique) *", fname);
+    System.out.print("\n");
     
-    // Solve each 3CNF graph
+   // Solve each 3CNF graph
     int i = 0;
     for (Graph graph : graphs) {
       i++;
@@ -45,9 +46,9 @@ public class solve3CNF {
 //      System.out.println(maxClique);
 //      System.out.println("Number of nodes in clique: " + maxClique.size());
 //      System.out.println("Graph size: " + graph.size() + ", number of clauses: " + graph.size() / 3);
-      if (i == 9) {
-        System.exit(1);
+      if (i == 16) {
+        System.exit(1); 
       }
-    }
-  }
+    } 
+  } 
 }

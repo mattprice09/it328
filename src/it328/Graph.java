@@ -5,7 +5,7 @@ import java.util.Set;
 
 public class Graph {
   
-  private int[][] matrix;
+  public int[][] matrix;
   private ArrayList<Integer> nodeList;
   private int nRange;
   private ArrayList<Integer[]> clauses;
@@ -48,14 +48,15 @@ public class Graph {
 	  this.matrix = new int[data.length][data.length];
 	  
 	  // depcopying nodelist
-	  this.nodeList = new ArrayList<Integer>();
+	  this.nodeList = nodeList;
+	  /*this.nodeList = new ArrayList<Integer>();
 	  for(int i = 0; i < nodeList.size(); i++)
 	  {
 		  this.nodeList.set(i, nodeList.get(i));
-	  }
+	  }*/
 	  
 	  //decopying clauses
-	  
+	  this.clauses = clauses;
 	  
 	  
     for (int i = 0; i < data.length; i++) {
