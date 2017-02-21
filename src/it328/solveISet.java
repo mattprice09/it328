@@ -1,13 +1,9 @@
 package it328;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class solveISet {
 
-  
   public static void main(String[] args) {
     
     // Accepts a graphs file name as the first and only arg
@@ -18,25 +14,58 @@ public class solveISet {
     String fname = args[0];
     
     // read graphs from file
-    ArrayList<Graph> graphs = Helpers.read3CNF(fname);
-//    ArrayList<Graph> graphs = readFile(fname);
+    ArrayList<Graph> graphs = Helpers.readFile(fname);
+    
+    System.out.printf("* Solve 3CNF in %s: (reduced to K-Clique) *", fname);
+    
+    // Solve each 3CNF graph
     int i = 0;
     for (Graph graph : graphs) {
       i++;
-      System.out.println(">>> Graph " + i);
-      Helpers.printGraph(graph);
-      ArrayList<ArrayList<Integer>> cliques = graph.findKCliques();
-      ArrayList<Integer> maxClique = graph.maxClique(cliques);
-//      if (maxClique.size() < graph.size() / 3) {
-//        System.out.printf("3CNF No.%i: [n=");
-//      }
-      System.out.println(maxClique);
-      System.out.println("Number of nodes in clique: " + maxClique.size());
-      System.out.println("Graph size: " + graph.size() + ", number of clauses: " + graph.size() / 3);
-      if (i == 9) {
-        System.exit(1);
+      
+      graph = graph.getComplement();
+
+      // t will be the time in milliseconds it took to get this solution
+      long sTime = System.currentTimeMillis();
+      
+//      Helpers.printGraph(graph);
+      
+      // Get the max clique for the graph
+      ArrayList<Integer> maxClique = graph.maxClique(null);
+      
+      double t = Helpers.getTimeElapsed(sTime, "ms");
+     
+      // OUTPUT results
+      if (maxClique.size() < graph.size() / 3) {
+        // no solution to 3CNF
+        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)", i, graph.getNRange(), graph.size() / 3, graph.size() / 3, t);
+      
+      } else if (maxClique.size() == graph.size() / 3) {
+        // found solution to 3CNF
+        
+        graph.setCliqueTruths(maxClique);
+        
+        // get formatted string of truth assignments
+        ArrayList<String> assignments = new ArrayList<String>();
+        for (int k = 1; k <= graph.getNRange(); k++) {
+          
+          // convert boolean value to T/F string
+          String s = "T";
+          if (!graph.getTruth(k)) {
+            s = "F";
+          }
+          assignments.add("A" + k + "=" + s);
+        }
+        String assignmentsStr = String.join(" ", assignments);
+        
+        // print assignments
+        System.out.printf("3CNF No.%d: [n=%d k=%d] Assignments:[%s] (%.4f ms)\n", i, graph.getNRange(), graph.size() / 3, assignmentsStr, t);
       }
+      System.out.print("\n");
+      
+//      if (i == 9) {
+//        System.exit(1);
+//      }
     }
   }
 }
-

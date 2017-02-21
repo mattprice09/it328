@@ -7,6 +7,22 @@ import java.util.Scanner;
 
 public class Helpers {
   
+  public static double getTimeElapsed(long sTime, String unit) {
+    long eTime = System.currentTimeMillis();
+    long tDelta = eTime - sTime;
+    
+    if (unit.equals("ms") || unit.equals("milliseconds")) {
+      return (double)tDelta;
+    } else if (unit.equals("seconds") || unit.equals("sec")) {
+      return tDelta / 1000.0;
+    }
+    
+    // user entered invalid unit string
+    System.out.println("> ERROR: Units of time must be either seconds or milliseconds.");
+    System.exit(0);
+    return -1;
+  }
+  
   /**
    * Prints a graph (2D int array) row by row
    */

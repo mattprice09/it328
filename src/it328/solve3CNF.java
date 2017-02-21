@@ -22,32 +22,48 @@ public class solve3CNF {
     int i = 0;
     for (Graph graph : graphs) {
       i++;
-//      System.out.println(">>> Graph " + i);
 
       // t will be the time in milliseconds it took to get this solution
-      int t = 5;
+      long sTime = System.currentTimeMillis();
       
-      Helpers.printGraph(graph);
+//      Helpers.printGraph(graph);
       
       // Get the max clique for the graph
       ArrayList<Integer> maxClique = graph.maxClique(null);
+      
+      double t = Helpers.getTimeElapsed(sTime, "ms");
      
+      // OUTPUT results
       if (maxClique.size() < graph.size() / 3) {
-        // No solution to the 3CNF
-        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%d ms", i, graph.getNRange(), graph.size() / 3, graph.size() / 3, t);
-      } else if (maxClique.size() == graph.size()) {
-        // Found solution to 3CNF. Print results
-      }
+        // no solution to 3CNF
+        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)", i, graph.getNRange(), graph.size() / 3, graph.size() / 3, t);
       
-//      3CNF No.1:[n=3 k=9] No 9-clique; no solution (3 ms)
-//      3CNF No.2:[n=3 k=8] Assignments:[A1=T A2=F A3=F ](0 ms)
-      
-//      System.out.println(maxClique);
-//      System.out.println("Number of nodes in clique: " + maxClique.size());
-//      System.out.println("Graph size: " + graph.size() + ", number of clauses: " + graph.size() / 3);
-      if (i == 9) {
-        System.exit(1);
+      } else if (maxClique.size() == graph.size() / 3) {
+        // found solution to 3CNF
+        
+        graph.setCliqueTruths(maxClique);
+        
+        // get formatted string of truth assignments
+        ArrayList<String> assignments = new ArrayList<String>();
+        for (int k = 1; k <= graph.getNRange(); k++) {
+          
+          // convert boolean value to T/F string
+          String s = "T";
+          if (!graph.getTruth(k)) {
+            s = "F";
+          }
+          assignments.add("A" + k + "=" + s);
+        }
+        String assignmentsStr = String.join(" ", assignments);
+        
+        // print assignments
+        System.out.printf("3CNF No.%d: [n=%d k=%d] Assignments:[%s] (%.4f ms)\n", i, graph.getNRange(), graph.size() / 3, assignmentsStr, t);
       }
+      System.out.print("\n");
+      
+//      if (i == 9) {
+//        System.exit(1);
+//      }
     }
   }
 }

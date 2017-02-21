@@ -1,6 +1,8 @@
 package it328;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 public class Graph {
@@ -9,6 +11,7 @@ public class Graph {
   private ArrayList<Integer> nodeList;
   private int nRange;
   private ArrayList<Integer[]> clauses;
+  private Map<Integer, Boolean> truthTable;
   
   /**
    * Default constructor
@@ -18,6 +21,9 @@ public class Graph {
     this.matrix = new int[0][0];
     this.nodeList = new ArrayList<Integer>();
     this.nRange = -1;
+    this.truthTable = new HashMap<Integer, Boolean>();
+    
+    this.initTruths();
   }
   
   /** 
@@ -37,6 +43,9 @@ public class Graph {
       }
     }
     this.nRange = -1;
+    this.truthTable = new HashMap<Integer, Boolean>();
+    
+    this.initTruths();
   }
   
   /**
@@ -61,6 +70,47 @@ public class Graph {
       }
     }
     this.nRange = -1;
+    this.truthTable = new HashMap<Integer, Boolean>();
+    
+    this.initTruths();
+  }
+  
+  // Initialize all truth values to FALSE
+  private void initTruths() {
+    for (int i = 0; i < this.clauses.size(); i++) {
+      for (int j = 0; j < this.clauses.get(i).length; j++) {
+        int k = this.clauses.get(i)[j];
+        this.setTruth(k, false);
+      }
+    }
+  }
+  
+  /**
+   * Set TRUE and FALSE values from clique results
+   * @param cliques
+   *    arraylist containing integers that represent nodes 
+   */
+  public void setCliqueTruths(ArrayList<Integer> clique) {
+    for (int ind : clique) {
+      int k = this.nodeList.get(ind);
+      this.setTruth(k, true);
+      this.setTruth(k*-1, false);
+    }
+  }
+  
+  // Get a variable's truth value
+  public boolean getTruth(int key) {
+    return this.truthTable.get(key);
+  }
+
+  // Set a variable's truth value
+  public void setTruth(int key, boolean val) {
+    
+    if (this.truthTable.containsKey(key)) {
+      this.truthTable.replace(key, val);
+    } else {
+      this.truthTable.put(key, val);
+    }
   }
   
   public int getNRange() {
