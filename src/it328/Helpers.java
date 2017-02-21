@@ -96,11 +96,11 @@ public class Helpers {
    * @param fname
    * @return
    */
-  public static ArrayList<Graph> read3CNF(String fname)
+  public static ArrayList<GraphCNF> read3CNF(String fname)
   {   
     int nRange;
     Scanner reader = null;
-    ArrayList<Graph> graphs = new ArrayList<Graph>();
+    ArrayList<GraphCNF> graphs = new ArrayList<GraphCNF>();
     try{
       reader = new Scanner(new File(fname));
     }catch(FileNotFoundException e)
@@ -128,7 +128,7 @@ public class Helpers {
         }
         
         matrix = new int[nodeList.size()][nodeList.size()];
-        Graph graph = buildCNFgraph(matrix, nodeList);
+        GraphCNF graph = buildCNFgraph(matrix, nodeList);
         graph.setNRange(nRange);
         graphs.add(graph); 
       }
@@ -142,7 +142,7 @@ public class Helpers {
    * @param nodeList
    * @return
    */
-  public static Graph buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList)
+  public static GraphCNF buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList)
   {
     int clauseFlag = 1;
     int node;
@@ -224,7 +224,7 @@ public class Helpers {
         }
       }
     }
-    Graph graph = new Graph(matrix, nodeList);
+    GraphCNF graph = new GraphCNF(matrix, nodeList);
     return graph;
   }
 }

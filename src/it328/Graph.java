@@ -12,24 +12,16 @@ import java.util.Set;
  */
 public class Graph {
   
-  private int[][] matrix;
-  private ArrayList<Integer> nodeList;
-  private int nRange;
-  private int numEdges;
-  private ArrayList<Integer[]> clauses;
-  private Map<Integer, Boolean> truthTable;
+  protected int[][] matrix;
+  protected int numEdges;
   
   /**
    * Default constructor
    */
   public Graph() {
-    this.clauses = new ArrayList<Integer[]>();
     this.matrix = new int[0][0];
-    this.nodeList = new ArrayList<Integer>();
-    this.nRange = -1;
-    this.truthTable = new HashMap<Integer, Boolean>();
+    this.numEdges = 0;
     
-    this.initTruths();
     this.initEdgeCounts();
   }
   
@@ -37,7 +29,6 @@ public class Graph {
    * Create the graph from a 2-D array
    */
   public Graph(int[][] data) {
-    this.clauses = new ArrayList<Integer[]>();
     this.matrix = new int[data.length][data.length];
     for (int i = 0; i < data.length; i++) {
       for (int j = 0; j < data.length; j++) {
@@ -49,113 +40,17 @@ public class Graph {
         }
       }
     }
-    this.nRange = -1;
-    this.truthTable = new HashMap<Integer, Boolean>();
-    
-    this.initTruths();
     this.initEdgeCounts();
   }
-  
-  /**
-   * Constructor for 3CNF graphs
-   */
-  public Graph(int[][] data, ArrayList<Integer> nodeList)
-  {
-    this.clauses = new ArrayList<Integer[]>();
-	  this.matrix = new int[data.length][data.length];
-	  
-	  // deepcopy instead of assign
-	  this.nodeList = nodeList;
-	  
-    for (int i = 0; i < data.length; i++) {
-      for (int j = 0; j < data.length; j++) {
-        // automatically remove self-loops
-        if (i == j) {
-          this.matrix[i][j] = 0;
-        } else {
-          this.matrix[i][j] = data[i][j];
-        }
-      }
-    }
-    this.nRange = -1;
-    this.truthTable = new HashMap<Integer, Boolean>();
-    
-    this.initTruths();
-    this.initEdgeCounts();
-  }
-  
-  // Initialize all truth values to FALSE
-  private void initTruths() {
-    for (int i = 0; i < this.clauses.size(); i++) {
-      for (int j = 0; j < this.clauses.get(i).length; j++) {
-        int k = this.clauses.get(i)[j];
-        this.setTruth(k, false);
-      }
-    }
-  }
-  
-//Initialize edge count for graph (e.g. the number of 1's in the matrix)
- private void initEdgeCounts() {
-   this.numEdges = 0;
-   for (int i = 0; i < this.size(); i++) {
-     for (int j = 0; j < this.size(); j++) {
-       if (this.matrix[i][j] == 1) {
-         this.numEdges++;
-       }
-     }
-   }
-   this.numEdges /= 2;
- }
-  
-  /**
-   * Set TRUE and FALSE values from clique results
-   * @param cliques
-   *    arraylist containing integers that represent nodes 
-   */
-  public void setCliqueTruths(ArrayList<Integer> clique) {
-    for (int ind : clique) {
-      int k = this.nodeList.get(ind);
-      this.setTruth(k, true);
-      this.setTruth(k*-1, false);
-    }
-  }
-  
-  // Get a variable's truth value
-  public boolean getTruth(int key) {
-    return this.truthTable.get(key);
-  }
-
-  // Set a variable's truth value
-  public void setTruth(int key, boolean val) {
-    
-    if (this.truthTable.containsKey(key)) {
-      this.truthTable.replace(key, val);
-    } else {
-      this.truthTable.put(key, val);
-    }
-  }
-  
+ 
+  // get number of edges
   public int getNumEdges() {
     return this.numEdges;
   }
   
+  // set number of edges
   public void setNumEdges(int n) {
     this.numEdges = n;
-  }
-  
-  public int getNRange() {
-    return this.nRange;
-  }
-  
-  public void setNRange(int n) {
-    this.nRange = n;
-  }
-  
-  /**
-   * Get the size of the graph (# of nodes)
-   */
-  public int size() {
-    return this.matrix.length;
   }
   
   /**
@@ -188,6 +83,28 @@ public class Graph {
       System.exit(0);
     }
     this.matrix[i][j] = val;
+  }
+  
+
+  //Initialize edge count for graph (e.g. the number of 1's in the matrix)
+  protected void initEdgeCounts() {
+    this.numEdges = 0;
+    for (int i = 0; i < this.size(); i++) {
+      for (int j = 0; j < this.size(); j++) {
+        if (this.matrix[i][j] == 1) {
+          this.numEdges++;
+        }
+      }
+    }
+    this.numEdges /= 2;
+  }
+  
+  
+  /**
+   * Get the size of the graph (# of nodes)
+   */
+  public int size() {
+    return this.matrix.length;
   }
   
   // Get a list of all other nodes that a node is connected to
@@ -241,20 +158,19 @@ public class Graph {
   }
   /**
    * Get all K-Cliques in the graph
-   * @param k
-   *    The size of the cliques
    * @return
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
   public ArrayList<ArrayList<Integer>> findKCliques() {
     
     ArrayList<ArrayList<Integer>> cliques = new ArrayList<ArrayList<Integer>>();
-    ArrayList<Integer> nodeList = new ArrayList<Integer>();
+    ArrayList<Integer> nodes = new ArrayList<Integer>();
     for (int i = 0; i < this.size(); i++) {
-      nodeList.add(i);
+      nodes.add(i);
     }
     
-    this.findCliques(cliques, new ArrayList<Integer>(), nodeList, new ArrayList<Integer>());
+    // in-place assignment of cliques
+    this.findCliques(cliques, new ArrayList<Integer>(), nodes, new ArrayList<Integer>());
     
     return cliques;
   }
@@ -286,9 +202,9 @@ public class Graph {
   }
   
   /**
-   * Get the biggest clique from a list of all cliques of the graph
+   * Get the biggest clique from a list of all cliques of the graph. 
    * @param cliques
-   *    The list of cliques found from findKCliques()
+   *    The list of cliques found from findKCliques(). If null, will call Graph.findKCliques()
    * @return
    *    An ArrayList containing all integers in the max clique
    */
