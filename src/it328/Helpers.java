@@ -68,7 +68,7 @@ public class Helpers {
    */
   public static ArrayList<Graph> read3CNF(String fname)
   {   
-    int numNodes;
+    int nRange;
     Scanner reader = null;
     ArrayList<Graph> graphs = new ArrayList<Graph>();
     try{
@@ -90,7 +90,7 @@ public class Helpers {
       if(!line.equals("0"))
       {
         String [] parts = line.split(" ");
-        numNodes = Integer.parseInt(parts[0]);//here num nodes refers to number of unique boolean primitives
+        nRange = Integer.parseInt(parts[0]);//here num nodes refers to number of unique boolean primitives
         
         for(int i = 1; i < parts.length; i++)
         {
@@ -99,6 +99,7 @@ public class Helpers {
         
         matrix = new int[nodeList.size()][nodeList.size()];
         Graph graph = buildCNFgraph(matrix, nodeList);
+        graph.setNRange(nRange);
         graphs.add(graph); 
       }
     }
@@ -115,7 +116,7 @@ public class Helpers {
   {
     int clauseFlag = 1;
     int node;
-    int node_j; 
+    int node_j;
     for(int i = 0; i < matrix.length; i++)
     {
       for(int j = 0; j<matrix.length; j++)

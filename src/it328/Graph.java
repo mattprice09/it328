@@ -7,18 +7,24 @@ public class Graph {
   
   private int[][] matrix;
   private ArrayList<Integer> nodeList;
+  private int nRange;
+  private ArrayList<Integer[]> clauses;
   
   /**
    * Default constructor
    */
   public Graph() {
+    this.clauses = new ArrayList<Integer[]>();
     this.matrix = new int[0][0];
+    this.nodeList = new ArrayList<Integer>();
+    this.nRange = -1;
   }
   
   /** 
    * Create the graph from a 2-D array
    */
   public Graph(int[][] data) {
+    this.clauses = new ArrayList<Integer[]>();
     this.matrix = new int[data.length][data.length];
     for (int i = 0; i < data.length; i++) {
       for (int j = 0; j < data.length; j++) {
@@ -30,6 +36,7 @@ public class Graph {
         }
       }
     }
+    this.nRange = -1;
   }
   
   /**
@@ -37,25 +44,35 @@ public class Graph {
    */
   public Graph(int[][] data, ArrayList<Integer> nodeList)
   {
+    this.clauses = new ArrayList<Integer[]>();
 	  this.matrix = new int[data.length][data.length];
 	  
 	  // deepcopy instead of assign
 	  this.nodeList = nodeList;
 	  
-	    for (int i = 0; i < data.length; i++) {
-	      for (int j = 0; j < data.length; j++) {
-	        // automatically remove self-loops
-	        if (i == j) {
-	          this.matrix[i][j] = 0;
-	        } else {
-	          this.matrix[i][j] = data[i][j];
-	        }
-	      }
-	    } 
+    for (int i = 0; i < data.length; i++) {
+      for (int j = 0; j < data.length; j++) {
+        // automatically remove self-loops
+        if (i == j) {
+          this.matrix[i][j] = 0;
+        } else {
+          this.matrix[i][j] = data[i][j];
+        }
+      }
+    }
+    this.nRange = -1;
+  }
+  
+  public int getNRange() {
+    return this.nRange;
+  }
+  
+  public void setNRange(int n) {
+    this.nRange = n;
   }
   
   /**
-   * Get the size of the graph
+   * Get the size of the graph (# of nodes)
    */
   public int size() {
     return this.matrix.length;
@@ -192,6 +209,12 @@ public class Graph {
    *    An ArrayList containing all integers in the max clique
    */
   public ArrayList<Integer> maxClique(ArrayList<ArrayList<Integer>> cliques) {
+    
+    // If cliques parameter is null, function will internally call findKCliques()
+    if (cliques == null) {
+      cliques = this.findKCliques();
+    }
+    
     int ind = 0;
     int high = cliques.get(0).size();
     for (int i = 1; i < cliques.size(); i++) {
