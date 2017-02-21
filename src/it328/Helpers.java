@@ -41,8 +41,58 @@ public class Helpers {
       for (int j = 0; j < graph.size(); j++) {
         row[j] = graph.getEdge(i,  j) + "";
       }
-      System.out.println(String.join(" ", row));
+      printTableRow(row);
     }
+  }
+  
+  /**
+   * Prints all clauses for a GraphCNF object, line by line
+   */
+  public static void printCNFGraphClauses(GraphCNF graph) {
+    for (int c = 0; c < graph.getClauses().size(); c++) {
+      System.out.printf("Clause #%d: ", c);
+      Integer [] clause = graph.getClause(c);
+      ArrayList<String> strCl = new ArrayList<String>();
+      for (int cl : clause) {
+        strCl.add(cl + "");
+      }
+      System.out.println(String.join(", ", strCl));
+    }
+  }
+  
+
+  /**
+   * Prints all the node list of a CNF Graph
+   */
+  public static void printCNFGraphLabelledMatrix(GraphCNF graph) {
+    ArrayList<Integer> nList = graph.getNodeList();
+    
+    // column labels
+    String [] row = new String[nList.size() + 1];
+    row[0] = "";
+    for (int n = 0; n < nList.size(); n++) {
+      row[n+1] = nList.get(n) + "";
+    }
+    printTableRow(row);
+    
+    // print each row
+    for (int i = 0; i < graph.size(); i++) {
+      row = new String[graph.size() + 1];
+      row[0] = nList.get(i) + "";
+      for (int j = 0; j < graph.size(); j++) {
+        row[j+1] = graph.getEdge(i,  j) + "";
+      }
+
+      printTableRow(row);
+    }
+  }
+  
+  // print a neatly spaced table row
+  private static void printTableRow(String [] row) {
+    for (int s = 0; s < row.length; s++) {
+      System.out.printf("%3s", row[s]);
+    }
+    System.out.println();
   }
   
   /**
@@ -113,8 +163,13 @@ public class Helpers {
     while(reader.hasNextLine())
     {
       String line = reader.nextLine();
+      //Building our simple structures
       ArrayList<Integer> nodeList = new ArrayList<Integer>();
+      ArrayList<Integer> nodeListTemp = new ArrayList<Integer>();
+      ArrayList<Integer []> clauses = new ArrayList<Integer []>();
+      ArrayList<Integer []> newClauses;
       int [][] matrix;
+      
       /* a line of just 0 signals the end of file
        * We do not need this */
       if(!line.equals("0"))
@@ -127,8 +182,35 @@ public class Helpers {
           nodeList.add(Integer.parseInt(parts[i]));
         }
         
+        //now we are building our clause list
+        for(int i = 0; i < nodeList.size(); )
+        {
+          Integer [] temp = new Integer [3];
+          for(int k = 0; k < 3; k ++)
+          {
+            temp[k] = nodeList.get(i);
+            i++;
+          }
+          
+          clauses.add(temp);
+        }
+       
+        newClauses = simplify3CNF(clauses);
+        
+        //rebuilding nodeList from simplified 3CNF
+        for(int i = 0; i < newClauses.size(); i++)
+        {
+          Integer [] temp = newClauses.get(i);
+          for(int k = 0; k < 3; k++)
+          {
+            nodeListTemp.add(temp[k]);
+          }
+        }
+        
         matrix = new int[nodeList.size()][nodeList.size()];
-        GraphCNF graph = buildCNFgraph(matrix, nodeList);
+        
+        GraphCNF graph = buildCNFgraph(matrix, nodeListTemp, clauses);
+//        GraphCNF graph = buildCNFgraph(matrix, nodeList, clauses);
         graph.setNRange(nRange);
         graphs.add(graph); 
       }
@@ -137,21 +219,65 @@ public class Helpers {
   }
   
   /**
+   * Will eliminate redundant terms in a single clause for the 3cnf statement.
+   * Any redundancy will be replaced with a zero.
+   */
+  private static ArrayList<Integer []> simplify3CNF(ArrayList<Integer []> clauses)
+  {
+    ArrayList<Integer []> newClauses = new ArrayList<Integer []>();
+   for(int i = 0; i < clauses.size(); i++)
+   {
+     Integer [] temp = clauses.get(i);
+     if(temp[0] == temp[1] && temp[0] == temp[2])
+     {
+       temp[1] = 0;
+       temp[2] = 0;
+       newClauses.add(temp);
+     }
+     else if(temp[0] == temp[1])//inside 2 terms
+     {
+       temp[1] = temp[2];
+       temp[2] = 0;
+       newClauses.add(temp);
+     }
+     else if(temp[0] == temp [2])//outside 2 terms
+     {
+       temp[2] = 0;
+       newClauses.add(temp);
+     }
+     else if(temp[1] == temp[2])//last 2 terms
+     {
+       temp[2] = 0;
+       newClauses.add(temp);
+     }
+     else
+     {
+       newClauses.add(temp);
+     }
+   }
+   return newClauses; 
+  }
+  
+  /**
    * Will build a graph for 3CNF 
    * @param matrix
    * @param nodeList
    * @return
    */
-  public static GraphCNF buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList)
+  public static GraphCNF buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList, ArrayList<Integer []> clauses)
   {
     int clauseFlag = 1;
     int node;
-    int node_j;
+    int node_j; 
+    
+    //copying clauses array
     for(int i = 0; i < matrix.length; i++)
     {
+      node = nodeList.get(i);
+      
       for(int j = 0; j<matrix.length; j++)
       {
-        node = nodeList.get(i);
+        
         node_j = nodeList.get(j);
         
         if(clauseFlag == 1)
@@ -159,6 +285,10 @@ public class Helpers {
           //cannot have edge with nodes in front of it by 2
           
           if(i == j)//cannot have edge to itself in the same clause
+          {
+            matrix[i][j] = 0;
+          }
+          else if(node == 0 || node_j == 0)//will not create edges with zero nodes
           {
             matrix[i][j] = 0;
           }
@@ -185,6 +315,10 @@ public class Helpers {
           {
             matrix[i][j] = 0;
           }
+          else if(node == 0 || node_j == 0)//will not create edges with zero nodes
+      {
+        matrix[i][j] = 0;
+      }
           else if((i == j + 1) || (i == j - 1))//checking 1 in front and 1 in back
           {
             matrix[i][j] = 0;
@@ -207,6 +341,10 @@ public class Helpers {
           {
             matrix[i][j] = 0;
           }
+          else if(node == 0 || node_j == 0)//will not create edges with zero nodes
+      {
+        matrix[i][j] = 0;
+      }
           else if((i == j - 1) || (i == j - 2))//checking the two nodes behind it
           {
             matrix[i][j] = 0;
@@ -224,7 +362,7 @@ public class Helpers {
         }
       }
     }
-    GraphCNF graph = new GraphCNF(matrix, nodeList);
+    GraphCNF graph = new GraphCNF(matrix, nodeList, clauses);
     return graph;
   }
 }

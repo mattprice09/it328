@@ -78,8 +78,8 @@ public class Graph {
       System.out.println("> ERROR: Matrix indeces are out of bounds.");
       System.exit(0);
     }
-    if (val != 0 && val != 1) {
-      System.out.println("> ERROR: Matrix value must be 0 or 1.");
+    if (val < -1 && val > 1) {
+      System.out.println("> ERROR: Matrix value must be -1, 0 or 1.");
       System.exit(0);
     }
     this.matrix[i][j] = val;

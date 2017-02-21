@@ -1,8 +1,11 @@
 package it328;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Extends Graph to provide the handling of 3CNF data. Stores data about the 3CNFs clauses, truth values, etc.
@@ -44,7 +47,7 @@ public class GraphCNF extends Graph {
   /**
    * Constructor for 3CNF graphs
    */
-  public GraphCNF(int[][] data, ArrayList<Integer> nodeList) {
+  public GraphCNF(int[][] data, ArrayList<Integer> nodeList, ArrayList<Integer []> clauses) {
     super();
     
     // deep copy matrix data
@@ -61,6 +64,9 @@ public class GraphCNF extends Graph {
     }
     
     this.clauses = new ArrayList<Integer[]>();
+    for (Integer [] cl : clauses) {
+      this.clauses.add(cl);
+    }
     this.nodeList = new ArrayList<Integer>();
     // deep copy nodeList
     for (int n : nodeList) {
@@ -70,6 +76,7 @@ public class GraphCNF extends Graph {
     this.truthTable = new HashMap<Integer, Boolean>();
     
     this.initTruths();
+    this.initEdgeCounts();
   }
   
   // Initialize all truth values to FALSE
@@ -81,6 +88,18 @@ public class GraphCNF extends Graph {
       }
     }
   }
+  
+  public Integer[] getClause(int n) {
+    return this.clauses.get(n);
+  }
+  
+  public ArrayList<Integer[]> getClauses() {
+    return this.clauses;
+  }
+  
+  public ArrayList<Integer> getNodeList() {
+    return this.nodeList;
+  }
  
   // Get the range of node name values (starting at 1)
   public int getNRange() {
@@ -90,6 +109,11 @@ public class GraphCNF extends Graph {
   // Set the range of node values
   public void setNRange(int n) {
     this.nRange = n;
+  }
+  
+  // Get the number of clauses at beginning 
+  public int getNumClauses() {
+    return this.clauses.size();
   }
   
   // Get a variable's truth value
@@ -105,6 +129,158 @@ public class GraphCNF extends Graph {
     } else {
       this.truthTable.put(key, val);
     }
+  }
+  
+  public String getAssignmentsStr() {
+    // get formatted string of truth assignments
+    ArrayList<String> assignments = new ArrayList<String>();
+    for (int k = 1; k <= this.getNRange(); k++) {
+      
+      // convert boolean value to T/F string
+      String s = "T";
+      if (!this.getTruth(k)) {
+        s = "F";
+      }
+      assignments.add("A" + k + "=" + s);
+    }
+    String assignmentsStr = String.join(" ", assignments);
+    return assignmentsStr;
+  }
+  
+  public void presolve() {
+    
+    if (this.clauses.size() == 0) {
+      return;
+    }
+    
+    Map<Integer, Boolean> known  = new HashMap<Integer, Boolean>();
+    boolean changed = true;
+//    int zz = 0;
+    while (changed && known.size() < this.nRange) {
+//      zz++;
+//      if (zz == 5) {
+//        System.exit(0);
+//      }
+//      System.out.println("######################");
+      changed = false;
+      
+      for (int c = 0; c < this.clauses.size(); c++) {
+        Integer [] clause = this.clauses.get(c);
+        
+//        for (int x = 0; x < clause.length; x++) {
+//          System.out.printf("%d, ", clause[x]);
+//        }
+//        System.out.println();
+        
+        // temporarily convert known false values to 0s
+        for (int i = 0; i < clause.length; i++) {
+          if (known.containsKey(clause[i]) && known.get(clause[i]) == false) {
+            clause[i] = 0;
+          }
+        }
+        
+        // First, check for all values being the samex
+        Set<Integer> uniqueVals = new HashSet<Integer>();
+        for (Integer n : clause) {
+          if ((!uniqueVals.contains(n)) && n != 0) {
+            uniqueVals.add(n);
+          }
+        }
+        if (uniqueVals.size() == 1) {
+          int unique = (int)uniqueVals.toArray()[0];
+          if (!known.containsKey(unique)) {
+            // clause contains only one unique value, therefore it must be true (ex: (3, 3, 3))
+            known.put(unique, true);
+            // the inverse value must then be false
+            known.put(unique*-1, false);
+            changed = true;
+            break;
+          }
+        }
+      }
+    }
+    
+    // Set truths for all keys
+    for (Integer key : known.keySet()) {
+      this.setTruth(key, known.get(key));
+    }
+    // Remove unnecessary clauses from clauses data structure
+    for (int cl = 0; cl < this.clauses.size(); cl++) {
+      Integer [] clause = this.clauses.get(cl);
+      Integer [] clCopy = Arrays.copyOf(clause, clause.length);
+      changed = false;
+      for (int c = 0; c < clause.length; c++) {
+        if (known.containsKey(clause[c]) && known.get(clause[c]) == false) {
+          clCopy[c] = 0;
+          changed = true;
+        }
+      }
+      if (changed) {
+        this.clauses.set(cl, clCopy);
+      }
+    }
+    // Reduce matrix size accordingly
+    for (int i = 0; i < this.size(); i++) {
+      if (known.containsKey(this.nodeList.get(i)) && known.get(this.nodeList.get(i)) == false) {
+        this.nodeList.set(i, 0);
+        for (int z = 0; z < this.size(); z++) {
+          if (this.matrix[i][z] == 1) {
+            this.matrix[i][z] = 0;
+            this.matrix[z][i] = 0;
+            this.numEdges--;
+          }
+        }
+      }
+    }
+    this.reduceZeroes();
+  }
+  
+  private void reduceZeroes() {
+    int newSize = this.size();
+    ArrayList<Integer> newNodeList = new ArrayList<Integer>();
+    
+    // get indeces of zero'd rows/cols
+    Set<Integer> zeroes = new HashSet<Integer>();
+    for (int i = 0; i < this.nodeList.size(); i++) {
+      if (this.nodeList.get(i) == 0) {
+        zeroes.add(i);
+        newSize--;
+      } else {
+        newNodeList.add(this.nodeList.get(i));
+      }
+    }
+    
+    int newNEdges = 0;
+    
+    // make new matrix with reduced size
+    int[][] newMatrix = new int[newSize][newSize];
+    int x = 0;
+    
+    for (int i = 0; i < this.size(); i++) {
+      int[] col = new int[newSize];
+      int y = 0;
+      if (!zeroes.contains(i)) {
+        for (int j = 0; j < this.size(); j++) {
+          if (!zeroes.contains(j)) {
+            col[y] = this.matrix[i][j];
+            if (i == j) {
+              col[y] = 0;
+            }
+            
+            // keep track of new number of edges
+            if (col[y] == 1) {
+              newNEdges++;
+            }
+            y++;
+          }
+        }
+        newMatrix[x] = col;
+        x++;
+      }
+    }
+    this.matrix = newMatrix;
+    this.nodeList = newNodeList;
+    this.numEdges = newNEdges / 2;
   }
   
   /**
