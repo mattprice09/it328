@@ -7,6 +7,15 @@ import java.util.Scanner;
 
 public class Helpers {
   
+  /**
+   * Get the time elapsed since a given starting time
+   * @param sTime
+   *    The starting time, in ms
+   * @param unit
+   *    Unit of time measurement. Current options are either seconds or milliseconds
+   * @return
+   *    Returns the time elapsed as a double
+   */
   public static double getTimeElapsed(long sTime, String unit) {
     long eTime = System.currentTimeMillis();
     long tDelta = eTime - sTime;
@@ -24,7 +33,7 @@ public class Helpers {
   }
   
   /**
-   * Prints a graph (2D int array) row by row
+   * Prints a Graph's matrix
    */
   public static void printGraph(Graph graph) {
     for (int i = 0; i < graph.size(); i++) {
@@ -37,7 +46,7 @@ public class Helpers {
   }
   
   /**
-   * Reads graphs from a given file name
+   * Reads graph matrices/metadata from a given file name
    */
   public static ArrayList<Graph> readFile(String fname) {
     int numNodes;
@@ -59,6 +68,11 @@ public class Helpers {
       // first line contains the number of nodes
       String line = reader.nextLine();
       numNodes = Integer.parseInt(line);
+      
+      // graph size of 0 indicates end of graph file
+      if (numNodes == 0) {
+        return graphs;
+      }
       
       // 2-D array to represent graph matrix
       int[][] matrix = new int[numNodes][numNodes];

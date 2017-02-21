@@ -1,15 +1,21 @@
 package it328;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Graph class that represents an undirected, unweighted graph. Provides functionality for finding K-Cliques
+ * @author Kevin Houlds, Matt Price
+ */
 public class Graph {
   
   private int[][] matrix;
   private ArrayList<Integer> nodeList;
   private int nRange;
+  private int numEdges;
   private ArrayList<Integer[]> clauses;
   private Map<Integer, Boolean> truthTable;
   
@@ -24,6 +30,7 @@ public class Graph {
     this.truthTable = new HashMap<Integer, Boolean>();
     
     this.initTruths();
+    this.initEdgeCounts();
   }
   
   /** 
@@ -46,6 +53,7 @@ public class Graph {
     this.truthTable = new HashMap<Integer, Boolean>();
     
     this.initTruths();
+    this.initEdgeCounts();
   }
   
   /**
@@ -73,6 +81,7 @@ public class Graph {
     this.truthTable = new HashMap<Integer, Boolean>();
     
     this.initTruths();
+    this.initEdgeCounts();
   }
   
   // Initialize all truth values to FALSE
@@ -84,6 +93,19 @@ public class Graph {
       }
     }
   }
+  
+//Initialize edge count for graph (e.g. the number of 1's in the matrix)
+ private void initEdgeCounts() {
+   this.numEdges = 0;
+   for (int i = 0; i < this.size(); i++) {
+     for (int j = 0; j < this.size(); j++) {
+       if (this.matrix[i][j] == 1) {
+         this.numEdges++;
+       }
+     }
+   }
+   this.numEdges /= 2;
+ }
   
   /**
    * Set TRUE and FALSE values from clique results
@@ -111,6 +133,14 @@ public class Graph {
     } else {
       this.truthTable.put(key, val);
     }
+  }
+  
+  public int getNumEdges() {
+    return this.numEdges;
+  }
+  
+  public void setNumEdges(int n) {
+    this.numEdges = n;
   }
   
   public int getNRange() {
@@ -149,9 +179,13 @@ public class Graph {
    * Set an edge value in the matrix
    */
   public void setEdge(int i, int j, int val) {
-    if ((i < 0 || i > 1) || (j < 0 || j > 1)) {
+    if ((i < 0 || i > this.size()) || (j < 0 || j > this.size())) {
+      System.out.println("> ERROR: Matrix indeces are out of bounds.");
+      System.exit(0);
+    }
+    if (val != 0 && val != 1) {
       System.out.println("> ERROR: Matrix value must be 0 or 1.");
-      return;
+      System.exit(0);
     }
     this.matrix[i][j] = val;
   }
@@ -236,13 +270,13 @@ public class Graph {
       {
         if(i == j)
         {
-          compliment.setEdge(i, j, 1);
+          compliment.setEdge(i, j, 0);
         }
         else if(compliment.getEdge(i,j) == 0)
         {
           compliment.setEdge(i, j, 1);
         }
-        else if(compliment.getEdge(i,j) == 1)
+        else
         {
           compliment.setEdge(i, j, 0);
         }
@@ -273,6 +307,10 @@ public class Graph {
         high = cliques.get(i).size();
       }
     }
-    return cliques.get(ind);
+    
+    // sort and return max clique
+    ArrayList<Integer> maxCl = cliques.get(ind);
+    Collections.sort(maxCl);
+    return maxCl;
   }
 }
