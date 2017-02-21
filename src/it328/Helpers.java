@@ -83,8 +83,14 @@ public class Helpers {
     while(reader.hasNextLine())
     {
       String line = reader.nextLine();
+      
+      //Building our simple structures
       ArrayList<Integer> nodeList = new ArrayList<Integer>();
+      ArrayList<Integer> nodeListTemp = new ArrayList<Integer>();
+      ArrayList<Integer []> clauses = new ArrayList<Integer []>();
       int [][] matrix;
+      
+      
       /* a line of just 0 signals the end of file
        * We do not need this */
       if(!line.equals("0"))
@@ -97,12 +103,42 @@ public class Helpers {
           nodeList.add(Integer.parseInt(parts[i]));
         }
         
+        //now we are building our clause list
+        for(int i = 0; i < nodeList.size(); )
+        {
+        	Integer [] temp = new Integer [3];
+        	for(int k = 0; k < 3; k ++)
+        	{
+        		temp[k] = nodeList.get(i);
+        		System.out.print(temp[k]);
+        		i++;
+        	}
+        	System.out.print("\n");
+        	clauses.add(temp);
+        }
+        
+        nodeListTemp = simplify3CNF(nodeList, clauses);
+        for(int i = 0; i < nodeList.size(); i++)
+        {
+        	nodeList.set(i,nodeListTemp.get(i));
+        }
+        
         matrix = new int[nodeList.size()][nodeList.size()];
-        Graph graph = buildCNFgraph(matrix, nodeList);
+        Graph graph = buildCNFgraph(matrix, nodeList, clauses);
         graphs.add(graph); 
       }
     }
     return graphs;
+  }
+  
+  /**
+   * Will eliminate redundant terms in a single clause for the 3cnf statement
+   */
+  
+  private static ArrayList<Integer> simplify3CNF(ArrayList<Integer> nodeList, ArrayList<Integer []> clauses)
+  {
+	 
+	 return null; 
   }
   
   /**
@@ -111,11 +147,15 @@ public class Helpers {
    * @param nodeList
    * @return
    */
-  public static Graph buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList)
+  public static Graph buildCNFgraph(int[][] matrix, ArrayList<Integer> nodeList, ArrayList<Integer []> cluases)
   {
     int clauseFlag = 1;
     int node;
     int node_j; 
+    ArrayList<Integer []> clauses = new ArrayList<Integer []>();
+    
+    //copying clauses array
+   
     for(int i = 0; i < matrix.length; i++)
     {
       for(int j = 0; j<matrix.length; j++)
@@ -193,7 +233,7 @@ public class Helpers {
         }
       }
     }
-    Graph graph = new Graph(matrix, nodeList);
+    Graph graph = new Graph(matrix, nodeList, clauses);
     return graph;
   }
 }

@@ -7,7 +7,7 @@ public class Graph {
   
   private int[][] matrix;
   private ArrayList<Integer> nodeList;
-  
+  private int[][] clauses;
   /**
    * Default constructor
    */
@@ -35,12 +35,20 @@ public class Graph {
   /**
    * Constructor for 3CNF graphs
    */
-  public Graph(int[][] data, ArrayList<Integer> nodeList)
+  public Graph(int[][] data, ArrayList<Integer> nodeList, ArrayList<Integer []> clauses)
   {
 	  this.matrix = new int[data.length][data.length];
 	  
-	  // deepcopy instead of assign
-	  this.nodeList = nodeList;
+	  // depcopying nodelist
+	  this.nodeList = new ArrayList<Integer>();
+	  for(int i = 0; i < nodeList.size(); i++)
+	  {
+		  this.nodeList.set(i, nodeList.get(i));
+	  }
+	  
+	  //decopying clauses
+	  
+	  
 	  
 	    for (int i = 0; i < data.length; i++) {
 	      for (int j = 0; j < data.length; j++) {
