@@ -1,6 +1,11 @@
 package it328;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Solve 3CNF problems by reducing CNF logical propositions to K-cliques and making determinations from there
@@ -27,31 +32,57 @@ public class solve3CNF {
     for (GraphCNF graph : graphs) {
       i++;
       
-//      Helpers.printCNFGraphLabelledMatrix(graph);
-//      Helpers.printCNFGraphClauses(graph);
+      Helpers.printCNFGraphLabelledMatrix(graph);
+      Helpers.printCNFGraphClauses(graph);
       
-//      int nBefore = graph.getNumEdges();
-//      System.out.println("Presolving...");
-      graph.presolve();
-//      System.out.println("Done presolving...");
-//      System.out.println("------");
-//      Helpers.printCNFGraphLabelledMatrix(graph);
-//      Helpers.printCNFGraphClauses(graph);
-//      System.out.printf("# edges before: %d, # edges after: %d\n", nBefore, graph.getNumEdges());
+      // Found out before running K-cliques that it is unsolveable
+      boolean solveable = graph.presolve();
+      if (!solveable) {
+        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)\n", i, graph.getNRange(), graph.getNumClauses(), graph.getNumClauses(), 0.0000);
+      }
+      
+      Helpers.printCNFGraphLabelledMatrix(graph);
+      Helpers.printCNFGraphClauses(graph);
+      
+      // Get the number of unsolved clauses
+      int unsolvedClauses = 0;
+      Set<Integer> skipNodes = new HashSet<Integer>();
+      int counter = 0;
+      for (Integer[] clause : graph.getClauses()) {
+        ArrayList<Integer> nonZeroes = new ArrayList<Integer>();
+        for (int c = 0; c < clause.length; c++) {
+          if (clause[c] != 0) {
+            nonZeroes.add(counter);
+            counter++;
+          }
+        }
+        if (nonZeroes.size() > 1) {
+          unsolvedClauses++;
+        } else {
+          // skip clauses with only 1 value remaining
+          for (int nz : nonZeroes) {
+            skipNodes.add(nz);
+          }
+        }
+      }
+      System.out.printf("Unsolved clauses: %d\n", unsolvedClauses);
+      Iterator<Integer> iter = skipNodes.iterator();
+      while (iter.hasNext()) {
+        int skNode = iter.next();
+        System.out.printf("%d, ", skNode);
+      }
+      System.out.println();
       
       // Get the max clique for the graph
       long sTime = System.currentTimeMillis();
-      ArrayList<Integer> maxClique = graph.maxClique(null);
+      ArrayList<Integer> maxClique = graph.maxClique(unsolvedClauses, skipNodes, null);
       double t = Helpers.getTimeElapsed(sTime, "ms");
-
-//      for (int k = 0; k < maxClique.size(); k++) {
-//        System.out.printf("%d, ", graph.getNodeList().get(maxClique.get(k)));
-//      }
-//      System.out.println();
+      
+      System.out.printf("max clique size: %d, numClauses(): %d\n", maxClique.size(), graph.getNumClauses());
      
       if (maxClique.size() < graph.getNumClauses()) {
         // no solution to 3CNF
-        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)\n", i, graph.getNRange(), graph.size() / 3, graph.size() / 3, t);
+        System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)\n", i, graph.getNRange(), graph.getNumClauses(), graph.getNumClauses(), t);
       
       } else if (maxClique.size() == graph.getNumClauses()) {
         // found solution to 3CNF
@@ -60,11 +91,11 @@ public class solve3CNF {
         
         String assignmentsStr = graph.getAssignmentsStr();
         
-        System.out.printf("3CNF No.%d: [n=%d k=%d] Assignments:[%s] (%.4f ms)\n", i, graph.getNRange(), graph.size() / 3, assignmentsStr, t);
+        System.out.printf("3CNF No.%d: [n=%d k=%d] Assignments:[%s] (%.4f ms)\n", i, graph.getNRange(), graph.getNumClauses(), assignmentsStr, t);
       }
-//      if (i == 1) {
-//        System.exit(1);
-//      }
+      if (i == 3) {
+        System.exit(1);
+      }
     }
   }
 }

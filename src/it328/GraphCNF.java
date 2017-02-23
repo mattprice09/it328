@@ -77,6 +77,8 @@ public class GraphCNF extends Graph {
     
     this.initTruths();
     this.initEdgeCounts();
+    
+    this.reduceZeroes();
   }
   
   // Initialize all truth values to FALSE
@@ -84,10 +86,14 @@ public class GraphCNF extends Graph {
     for (int i = 0; i < this.clauses.size(); i++) {
       for (int j = 0; j < this.clauses.get(i).length; j++) {
         int k = this.clauses.get(i)[j];
-        this.setTruth(k, false);
+        if (k != 0) {
+          this.setTruth(k, false);
+        }
       }
     }
   }
+  
+//~~~~~~~~~~~~~~~~~~~~~~~~ GETTERS AND SETTERS START
   
   public Integer[] getClause(int n) {
     return this.clauses.get(n);
@@ -99,6 +105,10 @@ public class GraphCNF extends Graph {
   
   public ArrayList<Integer> getNodeList() {
     return this.nodeList;
+  }
+  
+  public Map<Integer, Boolean> getTruthTable() {
+    return this.truthTable;
   }
  
   // Get the range of node name values (starting at 1)
@@ -147,30 +157,21 @@ public class GraphCNF extends Graph {
     return assignmentsStr;
   }
   
-  public void presolve() {
+  // ~~~~~~~~~~~~~~~~~~~~~~~~ GETTERS AND SETTERS END
+  
+  public boolean presolve() {
     
     if (this.clauses.size() == 0) {
-      return;
+      return false;
     }
     
     Map<Integer, Boolean> known  = new HashMap<Integer, Boolean>();
     boolean changed = true;
-//    int zz = 0;
     while (changed && known.size() < this.nRange) {
-//      zz++;
-//      if (zz == 5) {
-//        System.exit(0);
-//      }
-//      System.out.println("######################");
       changed = false;
       
       for (int c = 0; c < this.clauses.size(); c++) {
         Integer [] clause = this.clauses.get(c);
-        
-//        for (int x = 0; x < clause.length; x++) {
-//          System.out.printf("%d, ", clause[x]);
-//        }
-//        System.out.println();
         
         // temporarily convert known false values to 0s
         for (int i = 0; i < clause.length; i++) {
@@ -179,7 +180,7 @@ public class GraphCNF extends Graph {
           }
         }
         
-        // First, check for all values being the samex
+        // First, check for all values being the same
         Set<Integer> uniqueVals = new HashSet<Integer>();
         for (Integer n : clause) {
           if ((!uniqueVals.contains(n)) && n != 0) {
@@ -197,6 +198,21 @@ public class GraphCNF extends Graph {
             break;
           }
         }
+        
+        // Next, check if there is a current contradiction
+        boolean aTruth = false;
+        for (int i = 0; i < clause.length; i++) {
+          if (clause[i] == 0) {
+            continue;
+          }
+          if (known.containsKey(clause[i]) && known.get(clause[i]) == false) {
+            continue;
+          }
+          aTruth = true;
+        }
+        if (!aTruth) {
+          return false;
+        }
       }
     }
     
@@ -204,6 +220,7 @@ public class GraphCNF extends Graph {
     for (Integer key : known.keySet()) {
       this.setTruth(key, known.get(key));
     }
+    
     // Remove unnecessary clauses from clauses data structure
     for (int cl = 0; cl < this.clauses.size(); cl++) {
       Integer [] clause = this.clauses.get(cl);
@@ -233,6 +250,8 @@ public class GraphCNF extends Graph {
       }
     }
     this.reduceZeroes();
+    
+    return true;
   }
   
   private void reduceZeroes() {

@@ -3,6 +3,7 @@ package it328;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -119,12 +120,19 @@ public class Graph {
   }
   
   // Recursive method used to find all K-cliques
-  private void findCliques(ArrayList<ArrayList<Integer>> found, ArrayList<Integer> potentialClique,
+  private void findCliques(int k, ArrayList<ArrayList<Integer>> found, ArrayList<Integer> potentialClique,
                                                     ArrayList<Integer> remainingNodes, ArrayList<Integer> skipNodes) {
     if (remainingNodes.size() == 0 && skipNodes.size() == 0) {
       found.add(potentialClique);
       return;
     }
+//    
+//    if (k == 10) {
+//      for (int z = 0; z < remainingNodes.size(); z++) {
+//        System.out.printf("%d, ", remainingNodes.get(z));
+//      }
+//      System.out.println();
+//    }
     
     for (int n = 0; n < remainingNodes.size(); n++) {
       int node = remainingNodes.get(n);
@@ -150,7 +158,7 @@ public class Graph {
         }
       }
       
-      this.findCliques(found, newPotential, newRemaining, newSkips);
+      this.findCliques(k, found, newPotential, newRemaining, newSkips);
       
       remainingNodes.remove(n);
       skipNodes.add(node);
@@ -161,16 +169,40 @@ public class Graph {
    * @return
    *    An ArrayList containing all of the K-cliques, represented as arrays of node IDs
    */
-  public ArrayList<ArrayList<Integer>> findKCliques() {
+  public ArrayList<ArrayList<Integer>> findKCliques(int k, Set<Integer> initialSkips) {
     
     ArrayList<ArrayList<Integer>> cliques = new ArrayList<ArrayList<Integer>>();
     ArrayList<Integer> nodes = new ArrayList<Integer>();
     for (int i = 0; i < this.size(); i++) {
-      nodes.add(i);
+      
+      if (k != -1) {
+        // filter out any nodes that have no chance of being in the clique
+        if (initialSkips.contains(i)) {
+          continue;
+        }
+        
+        // attempt to compare the number of clauses this node is related to and the K value
+        // this segment does not work :(
+//        Set<Integer> neighborClauses = new HashSet<Integer>();
+//        ArrayList<Integer> neighbors = this.adjacentNodes(i);
+//        for (int neigh : neighbors) {
+//          int clause = neigh / 3;
+//          if (!neighborClauses.contains(clause)) {
+//            neighborClauses.add(clause);
+//          }
+//        }
+//        if (neighborClauses.size() >= k) {
+//          nodes.add(i);
+//        }
+        nodes.add(i);
+      } else {
+        // no need to reduce
+        nodes.add(i);
+      }
     }
     
     // in-place assignment of cliques
-    this.findCliques(cliques, new ArrayList<Integer>(), nodes, new ArrayList<Integer>());
+    this.findCliques(k, cliques, new ArrayList<Integer>(), nodes, new ArrayList<Integer>());
     
     return cliques;
   }
@@ -208,11 +240,11 @@ public class Graph {
    * @return
    *    An ArrayList containing all integers in the max clique
    */
-  public ArrayList<Integer> maxClique(ArrayList<ArrayList<Integer>> cliques) {
+  public ArrayList<Integer> maxClique(int k, Set<Integer> initialSkips, ArrayList<ArrayList<Integer>> cliques) {
     
     // If cliques parameter is null, function will internally call findKCliques()
     if (cliques == null) {
-      cliques = this.findKCliques();
+      cliques = this.findKCliques(k, initialSkips);
     }
     
     int ind = 0;

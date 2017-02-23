@@ -49,7 +49,7 @@ public class SolveGraphGeneral {
 
       // get max clique for the graph's compliment
       long sTime = System.currentTimeMillis();
-      ArrayList<Integer> maxClique = graph.maxClique(null);
+      ArrayList<Integer> maxClique = graph.maxClique(-1, null, null);
       double t = Helpers.getTimeElapsed(sTime, "ms");
       
       // format output
