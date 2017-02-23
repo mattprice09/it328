@@ -126,13 +126,6 @@ public class Graph {
       found.add(potentialClique);
       return;
     }
-//    
-//    if (k == 10) {
-//      for (int z = 0; z < remainingNodes.size(); z++) {
-//        System.out.printf("%d, ", remainingNodes.get(z));
-//      }
-//      System.out.println();
-//    }
     
     for (int n = 0; n < remainingNodes.size(); n++) {
       int node = remainingNodes.get(n);
@@ -183,6 +176,7 @@ public class Graph {
         
         // attempt to compare the number of clauses this node is related to and the K value
         // this segment does not work :(
+        // @ Dr. Li, if you see this, how far off were we here? 
 //        Set<Integer> neighborClauses = new HashSet<Integer>();
 //        ArrayList<Integer> neighbors = this.adjacentNodes(i);
 //        for (int neigh : neighbors) {

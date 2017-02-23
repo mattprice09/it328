@@ -32,17 +32,18 @@ public class solve3CNF {
     for (GraphCNF graph : graphs) {
       i++;
       
-      Helpers.printCNFGraphLabelledMatrix(graph);
-      Helpers.printCNFGraphClauses(graph);
+//      Helpers.printCNFGraphLabelledMatrix(graph);
+//      Helpers.printCNFGraphClauses(graph);
       
       // Found out before running K-cliques that it is unsolveable
       boolean solveable = graph.presolve();
       if (!solveable) {
         System.out.printf("3CNF No.%d: [n=%d k=%d] No %d-clique; no solution (%.4f ms)\n", i, graph.getNRange(), graph.getNumClauses(), graph.getNumClauses(), 0.0000);
+        continue;
       }
       
-      Helpers.printCNFGraphLabelledMatrix(graph);
-      Helpers.printCNFGraphClauses(graph);
+//      Helpers.printCNFGraphLabelledMatrix(graph);
+//      Helpers.printCNFGraphClauses(graph);
       
       // Get the number of unsolved clauses
       int unsolvedClauses = 0;
@@ -65,20 +66,13 @@ public class solve3CNF {
           }
         }
       }
-      System.out.printf("Unsolved clauses: %d\n", unsolvedClauses);
-      Iterator<Integer> iter = skipNodes.iterator();
-      while (iter.hasNext()) {
-        int skNode = iter.next();
-        System.out.printf("%d, ", skNode);
-      }
-      System.out.println();
       
       // Get the max clique for the graph
       long sTime = System.currentTimeMillis();
       ArrayList<Integer> maxClique = graph.maxClique(unsolvedClauses, skipNodes, null);
       double t = Helpers.getTimeElapsed(sTime, "ms");
       
-      System.out.printf("max clique size: %d, numClauses(): %d\n", maxClique.size(), graph.getNumClauses());
+//      System.out.printf("max clique size: %d, numClauses(): %d\n", maxClique.size(), graph.getNumClauses());
      
       if (maxClique.size() < graph.getNumClauses()) {
         // no solution to 3CNF
@@ -92,9 +86,6 @@ public class solve3CNF {
         String assignmentsStr = graph.getAssignmentsStr();
         
         System.out.printf("3CNF No.%d: [n=%d k=%d] Assignments:[%s] (%.4f ms)\n", i, graph.getNRange(), graph.getNumClauses(), assignmentsStr, t);
-      }
-      if (i == 3) {
-        System.exit(1);
       }
     }
   }
