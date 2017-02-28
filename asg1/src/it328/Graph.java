@@ -120,6 +120,7 @@ public class Graph {
   }
   
   // Recursive method used to find all K-cliques
+  @SuppressWarnings("unchecked")
   private void findCliques(int k, ArrayList<ArrayList<Integer>> found, ArrayList<Integer> potentialClique,
                                                     ArrayList<Integer> remainingNodes, ArrayList<Integer> skipNodes) {
     if (remainingNodes.size() == 0 && skipNodes.size() == 0) {
