@@ -205,17 +205,17 @@ public class NFAGraph {
     this.states.get(source).addTransition(dest, type);
   }
   
+  // recursively find all possible transitions from a given starting state
   @SuppressWarnings("unchecked")
   private void recursiveGetAllTransitions(Map<String, HashSet<String>> transOptions, HashSet<String> visited,
                                           String state, HashSet<String> compound, String parentType) {
-//    if (visited.contains(state)) {
-//      return;
-//    }
+    
     visited.add(state);
     ArrayList<Transition> transQueue = this.states.get(state).getTransitions();
     for (Transition trans : transQueue) {
       String transType = parentType;
       if (trans.type.equals("lambda") && parentType.equals("")) {
+        // lambda at starting state, ignore
         continue;
       }
       if (transType.equals("")) {
@@ -225,7 +225,8 @@ public class NFAGraph {
         // New state function
         
         if (this.states.get(trans.dest).isForwardingState()) {
-          // recursion for lambdas
+          // this transition's destination has an outgoing lambda. make recursive call
+          // from destination state
           HashSet<String> comp = (HashSet<String>)compound.clone();
           if (!comp.contains(trans.dest)) {
             comp.add(trans.dest);
@@ -249,6 +250,9 @@ public class NFAGraph {
     }
   }
   
+  /**
+   * Get all transition possibilities for a set of states
+   */
   public Map<String, String> getAllPossibleTransitions(String [] states) {
     Map<String, HashSet<String>> transOptions = new HashMap<String, HashSet<String>>();
     HashSet<String> visited = new HashSet<String>();

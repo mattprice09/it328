@@ -70,13 +70,23 @@ public class NFA {
     String nfaFile = args[0];
     String stringsFile = args[1];
     
-    NFAGraph nfaGraph = new NFAGraph(nfaFile);
-    nfaGraph.printGraph();
-    System.out.println();
-    System.out.println("To DFA:");
-    DFAGraph dfaGraph = convertNFA(nfaGraph);
-    dfaGraph.parseStringsFile(stringsFile);
-    dfaGraph.printGraph();
+    String rootStr = "asg2/src/resources/nfa";
+    for (int i = 1; i < 9; i++) {
+      NFAGraph nfaGraph = new NFAGraph(rootStr+i);
+      nfaGraph.printGraph();
+      System.out.println();
+      System.out.println("To DFA:");
+      DFAGraph dfaGraph = convertNFA(nfaGraph);
+      dfaGraph.parseStringsFile(stringsFile);
+      dfaGraph.printGraph();
+    }
+//    NFAGraph nfaGraph = new NFAGraph(nfaFile);
+//    nfaGraph.printGraph();
+//    System.out.println();
+//    System.out.println("To DFA:");
+//    DFAGraph dfaGraph = convertNFA(nfaGraph);
+//    dfaGraph.parseStringsFile(stringsFile);
+//    dfaGraph.printGraph();
     
   }
 }
