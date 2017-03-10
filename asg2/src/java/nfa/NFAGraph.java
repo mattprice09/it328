@@ -10,15 +10,27 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-public class AutomataGraph {
-  private Map<String, StateNode> states;
-  private String startState;
-  private Set<String> endStates;
+import nfa.NFAGraph.Transition;
+
+/**
+ * A graph data structure containing node objects and edge objects, named
+ * StateNode and Transition, respectively.
+ * @author Matt Price
+ *
+ */
+public class NFAGraph {
+  protected Map<String, StateNode> states;
+  protected String startState;
+  protected Set<String> endStates;
+  protected ArrayList<String> transitionOpts;
   
+  /**
+   * ~~~ BEGIN INNER CLASSES
+   */
   /**
    * Transitions (edges) between two states (nodes)
    */
-  private class Transition {
+  protected class Transition {
     private String dest;
     private String type;
     
@@ -33,21 +45,25 @@ public class AutomataGraph {
     public String getType() {
       return this.type;
     }
-    
-    public String toString() {
-      return "next: " + this.dest + ", transition: " + this.type;
-    }
   }
   /**
    * States (nodes) in the graph
    */
-  private class StateNode {
+  protected class StateNode {
     private String name;
     private ArrayList<Transition> transitions;
     
     public StateNode(String name) {
       this.name = name;
       this.transitions = new ArrayList<Transition>();
+    }
+    
+    // getter/setter for name
+    public String getName() {
+      return this.name;
+    }
+    public void setName(String n) {
+      this.name = n;
     }
     
     // add a transition (edge) to the state
@@ -76,30 +92,23 @@ public class AutomataGraph {
       }
       return false;
     }
-    
-    // stringified representation of the state
-    public String toString() {
-      ArrayList<String> strBuilder = new ArrayList<String>();
-      strBuilder.add("State: " + this.name);
-      strBuilder.add("    Transitions: ");
-      for (Transition trans : this.transitions) {
-        strBuilder.add("    " + trans.toString());
-      }
-      return String.join("\n", strBuilder);
-    }
   }
+  /**
+   * ~~~ END INNER CLASSES
+   */
   
   // default constructor
-  public AutomataGraph() {
+  public NFAGraph() {
     this.states = new HashMap<String, StateNode>();
     this.startState = "";
     this.endStates = new HashSet<String>();
+    this.transitionOpts = new ArrayList<String>();
   }
   
   /**
    * Constructor which accepts an input file of specific format
    */
-  public AutomataGraph(String fileName) {
+  public NFAGraph(String fileName) {
     this.states = new HashMap<String, StateNode>();
     File infile = new File(fileName);
     try {
@@ -114,8 +123,10 @@ public class AutomataGraph {
       line = reader.nextLine();
       String [] parts = line.replaceAll("\t", " ").trim().replaceAll(" +", " ").split(" ");
       Map<Integer, String> transitionTypes = new HashMap<Integer, String>();
+      this.transitionOpts = new ArrayList<String>();
       for (int i = 0; i < parts.length; i++) {
         transitionTypes.put(i, parts[i]);
+        this.transitionOpts.add(parts[i]);
       }
       
       // Read info about all states (essentially a matrix)
@@ -159,6 +170,15 @@ public class AutomataGraph {
     return this.states;
   }
   
+  // get/set transition options (e.g. ["a", "b", ...]
+  @SuppressWarnings("unchecked")
+  public void setTransitionOpts(ArrayList<String> newOpts) {
+    this.transitionOpts = (ArrayList<String>) newOpts.clone();
+  }
+  public ArrayList<String> getTransitionOpts() {
+    return this.transitionOpts;
+  }
+  
   // get/set the start state
   public String getStartState() {
     return this.startState;
@@ -175,20 +195,6 @@ public class AutomataGraph {
     this.endStates.add(s);
   }
   
-  // sets end states based on a set of states from an NFA graph
-  // implies that this instance is a DFA graph
-  public void setEndStatesFromNFA(Set<String> endStates) {
-    for (String nfaSt : endStates) {
-      for (String dfaSt : this.states.keySet()) {
-        Set<String> stParts = new HashSet<String>(Arrays.asList(dfaSt.split("-")));
-        if (stParts.contains(nfaSt)) {
-          this.addEndState(dfaSt);
-          break;
-        }
-      }
-    }
-  }
-  
   // add a state (node) to the graph
   public void addState(String name) {
     this.states.put(name, new StateNode(name));
@@ -197,17 +203,6 @@ public class AutomataGraph {
   // add a transition (edge) to the graph
   public void addTransition(String source, String dest, String type) {
     this.states.get(source).addTransition(dest, type);
-  }
-  
-  // stringified representation of the graph
-  public String toString() {
-    ArrayList<String> strBuilder = new ArrayList<String>();
-    strBuilder.add("Start state: " + this.startState);
-    strBuilder.add("End states: " + String.join(",", this.endStates));
-    for (StateNode state : this.states.values()) {
-      strBuilder.add(state.toString());
-    }
-    return String.join("\n", strBuilder);
   }
   
   @SuppressWarnings("unchecked")
@@ -271,5 +266,43 @@ public class AutomataGraph {
       transOptionStrings.put(type, String.join("-", transStates));
     }
     return transOptionStrings;
+  }
+  
+  // print stringified representation of the graph
+  public void printGraph() {
+    System.out.println("Sigma: " + String.join(" ", this.transitionOpts));
+    System.out.println("------");
+    for (int i = 0; i < this.states.size(); i++) {
+      System.out.printf("%2s:", i+"");
+      // get mapping of transition types to list of destinations
+      Map<String, ArrayList<String>> transitionTypes = new HashMap<String, ArrayList<String>>();
+      for (Transition t : this.states.get(i+"").getTransitions()) {
+        String type = t.getType();
+        if (type.equals("lambda")) {
+          type = " ";
+        }
+        if (!transitionTypes.containsKey(type)) {
+          transitionTypes.put(type, new ArrayList<String>());
+        } 
+        transitionTypes.get(type).add(t.getDest());
+      }
+      // print values, accounting for non-existing transitions in a state
+      for (int j = 0; j < this.transitionOpts.size(); j++) {
+        if (transitionTypes.containsKey(this.transitionOpts.get(j))) {
+          System.out.printf("%2s(%s,{%s})", "", this.transitionOpts.get(j)+"", String.join(", ", transitionTypes.get(this.transitionOpts.get(j)+"")));
+        } else {
+          System.out.printf("%2s(%s,{%s})", "", this.transitionOpts.get(j), "");
+        }
+      }
+      if (transitionTypes.containsKey(" ")) {
+        System.out.printf("%2s(%s,{%s})", "", " ", String.join(", ", transitionTypes.get(" ")));
+      } else {
+        System.out.printf("%2s(%s,{%s})", "", " ", "");
+      }
+      System.out.println();
+    }
+    System.out.println("------");
+    System.out.println(this.startState + ": Initial State");
+    System.out.println(String.join(", ", this.endStates) + ": Accepting State(s)");
   }
 }

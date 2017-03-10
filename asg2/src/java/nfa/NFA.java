@@ -1,6 +1,7 @@
 package nfa;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -14,9 +15,10 @@ public class NFA {
    * @return
    *    A graph object representing a DFA
    */
-  public static AutomataGraph convertNFA(AutomataGraph nfaGraph) {
-    AutomataGraph dfa = new AutomataGraph();
+  public static DFAGraph convertNFA(NFAGraph nfaGraph) {
+    DFAGraph dfa = new DFAGraph();
     dfa.setStartState(nfaGraph.getStartState());
+    dfa.setTransitionOpts(nfaGraph.getTransitionOpts());
     
     // initialize queue
     ArrayList<String> queue = new ArrayList<String>();
@@ -46,6 +48,16 @@ public class NFA {
     }
     // set end states for DFA
     dfa.setEndStatesFromNFA(nfaGraph.getEndStates());
+    
+    // get name mapping to use for refactoring names
+    Map<String, String> nameMapping = new HashMap<String, String>();
+    int i = 0;
+    for (String name : dfa.states.keySet()) {
+      nameMapping.put(name, i+"");
+      i++;
+    }
+    // refactor names in DFA
+    dfa.refactorNames(nameMapping);
     return dfa;
   }
   
@@ -58,18 +70,13 @@ public class NFA {
     String nfaFile = args[0];
     String stringsFile = args[1];
     
-//    String rootStr = "asg2/src/resources/nfa";
-//    for (int i = 1; i < 9; i++) {
-//      System.out.println("\n> NEW GRAPH\n\n  NFA:\n");
-//      AutomataGraph nfaGraph = new AutomataGraph(rootStr + i);
-//      System.out.println(nfaGraph.toString());
-//      System.out.println("\n  DFA:\n");
-//      AutomataGraph dfaGraph = convertNFA(nfaGraph);
-//      System.out.println(dfaGraph.toString());
-//    }
-    AutomataGraph nfaGraph = new AutomataGraph(nfaFile);
-    System.out.println(nfaGraph.toString());
-    AutomataGraph dfaGraph = convertNFA(nfaGraph);
-    System.out.println(dfaGraph.toString());
+    NFAGraph nfaGraph = new NFAGraph(nfaFile);
+    nfaGraph.printGraph();
+    System.out.println();
+    System.out.println("To DFA:");
+    DFAGraph dfaGraph = convertNFA(nfaGraph);
+    dfaGraph.parseStringsFile(stringsFile);
+    dfaGraph.printGraph();
+    
   }
 }
