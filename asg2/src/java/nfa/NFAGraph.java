@@ -92,6 +92,17 @@ public class NFAGraph {
       }
       return false;
     }
+    
+    public String toString() {
+      ArrayList<String> parts = new ArrayList<String>();
+      parts.add("> State name: " + this.name);
+      parts.add("  Transitions: ");
+      for (Transition t : this.transitions) {
+        parts.add("    " + t.type + " -> " + t.dest);
+      }
+      return String.join("\n", parts);
+    }
+    
   }
   /**
    * ~~~ END INNER CLASSES
@@ -156,7 +167,7 @@ public class NFAGraph {
       this.endStates = new HashSet<String>();
       parts = reader.nextLine().replace("{", "").replace("}", "").split(",");
       for (String st : parts) {
-        this.endStates.add(st);
+        this.endStates.add(st.replaceAll(" ", ""));
       }
       
       reader.close();

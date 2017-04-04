@@ -28,6 +28,11 @@ public class DFAGraph extends NFAGraph {
     this.acceptedStrings = new ArrayList<String>();
   }
   
+  public DFAGraph(String filename) {
+    super(filename);
+    this.acceptedStrings = new ArrayList<String>();
+  }
+  
   /**
    * Refactor the DFA's naming schema by replacing names such as "1-4-2-3" with
    * shorter names such as "1". Performs a deepcopy of the states map.
@@ -129,7 +134,12 @@ public class DFAGraph extends NFAGraph {
     System.out.println("-------------------------");
     
     // print states as rows
-    for (int i = 0; i < this.states.size(); i++) {
+    int n = this.states.size();
+    for (int i = 0; i < n; i++) {
+      if (!this.states.containsKey(i+"")) {
+        n++;
+        continue;
+      }
       System.out.printf("%5s:", i+"");
       
       // get mapping of transition types to list of destinations
@@ -154,5 +164,15 @@ public class DFAGraph extends NFAGraph {
     for (String s : this.acceptedStrings) {
       System.out.println(s);
     }
+  }
+  
+  public String toString() {
+    ArrayList<String> parts = new ArrayList<String>();
+    
+    for (String s : this.states.keySet()) {
+      parts.add(this.states.get(s).toString());
+    }
+    return String.join("\n", parts);
+    
   }
 }
