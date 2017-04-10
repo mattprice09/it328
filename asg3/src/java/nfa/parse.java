@@ -39,18 +39,19 @@ public class parse {
      * In all cases currently, the DFA's size is reduced (as expected).
      */
     
-    String rootStr = "asg2/src/resources/";
-    if (!nfaFile.contains("/")) {
-      // runs the algorithm on one single nfa file
-      
-//      System.out.println("\n#################################\n");
-      NFAGraph nfaGraph = new NFAGraph(rootStr+nfaFile);
-//      nfaGraph.printGraph();
-//      
-//      System.out.println("\n\nTo DFA:");
+//  String rootStr = "asg2/src/resources/";
+  
+    if (!nfaFile.equals("testall")) {
+      // run algorithm on NFA from an nfa file
+
+  //    System.out.println("\n#################################\n");
+      NFAGraph nfaGraph = new NFAGraph(nfaFile);
+  //    nfaGraph.printGraph();
+  //    
+  //    System.out.println("\n\nTo DFA:");
       DFAGraph dfaGraph = NFA.convertNFA(nfaGraph);
-//      dfaGraph.parseStringsFile(stringsFile);
-//      dfaGraph.printGraph();
+  //    dfaGraph.parseStringsFile(stringsFile);
+  //    dfaGraph.printGraph();
       
       System.out.println("\n\nMinimized DFA from " + nfaFile + ":");
       DFAGraph minimized = minimize(dfaGraph);
@@ -60,23 +61,22 @@ public class parse {
       // this is used for testing purposes...runs the algorithm
       // on all available input nfa files
       
-        rootStr = rootStr + "nfa";
-        for (int i = 1; i < 10; i++) {
-//          System.out.println("\n#################################\n");
-          NFAGraph nfaGraph = new NFAGraph(rootStr+i);
-//          nfaGraph.printGraph();
-//          
-//          System.out.println("\n\nTo DFA:");
-          DFAGraph dfaGraph = NFA.convertNFA(nfaGraph);
-//          dfaGraph.parseStringsFile(stringsFile);
-//          dfaGraph.printGraph();
-//          
-          System.out.println("\n\nMinimized DFA from " + nfaFile + ":");
-          DFAGraph minimized = minimize(dfaGraph);
-          minimized.parseStringsFile(stringsFile);
-          minimized.printGraph();
-        }
+      rootStr = rootStr + "nfa";
+      for (int i = 1; i < 10; i++) {
+        System.out.println("\n#################################\n");
+        NFAGraph nfaGraph = new NFAGraph("nfa" + i);
+        nfaGraph.printGraph();
+        
+        System.out.println("\n\nTo DFA:");
+        DFAGraph dfaGraph = NFA.convertNFA(nfaGraph);
+        dfaGraph.parseStringsFile(stringsFile);
+        dfaGraph.printGraph();
+
+        System.out.println("\n\nMinimized DFA from " + nfaFile + ":");
+        DFAGraph minimized = minimize(dfaGraph);
+        minimized.parseStringsFile(stringsFile);
+        minimized.printGraph();
+      }
     }
-    
   }
 }
