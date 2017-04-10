@@ -55,7 +55,7 @@ public class DFAGraph extends NFAGraph {
     for (String s : this.endStates) {
       newEnds.add(nameMapping.get(s));
     }
-    this.endStates = newEnds;
+    this.endStates = new HashSet<String>(newEnds);
   }
   
   // sets end states based on a set of states from an NFA graph

@@ -1,8 +1,10 @@
 package nfa;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 public class DFAReducer {
@@ -102,7 +104,6 @@ public class DFAReducer {
     
     Map<String, HashSet<String>> newStates = new HashMap<String, HashSet<String>>();
     int currKey = 0;
-    
     for (String ns : this.reducedStates.keySet()) {
       Map<String, HashSet<String>> tempNewStates = new HashMap<String, HashSet<String>>();
       
@@ -110,13 +111,43 @@ public class DFAReducer {
       for (String state : this.reducedStates.get(ns)) {
         // sub-partition a partition
         String stateCombo = this.getCombo(state);
-        if (tempNewStates.containsKey(stateCombo)) {
-          tempNewStates.get(stateCombo).add(state);
+        List<String> parts = Arrays.asList(stateCombo.split("-"));
+        if (parts.size() == this.original.transitionOpts.size() && (!parts.contains(""))) {
+          // look for direct match
+          if (tempNewStates.containsKey(stateCombo)) {
+            tempNewStates.get(stateCombo).add(state);
+          } else {
+            // new partition
+            HashSet<String> newState = new HashSet<String>();
+            newState.add(state);
+            tempNewStates.put(stateCombo, newState);
+          }
         } else {
-          // new partition
-          HashSet<String> newState = new HashSet<String>();
-          newState.add(state);
-          tempNewStates.put(stateCombo, newState);
+          // see if it is a substate set (e.g. a->0 merge with [a->0, b->1])
+          boolean outerMatch = false;
+          for (String tns : tempNewStates.keySet()) {
+            HashSet<String> tnsParts = new HashSet<String>(Arrays.asList(tns.split("-")));
+            boolean matched = true;
+            for (String part : parts) {
+              if (!tnsParts.contains(part)) {
+                // not a match
+                matched = false;
+                break;
+              }
+            }
+            if (matched) {
+              // this state can be reduced into another new state
+              tempNewStates.get(tns).add(state);
+              outerMatch = true;
+              break;
+            }
+          }
+          if (!outerMatch) {
+            // new partition
+            HashSet<String> newState = new HashSet<String>();
+            newState.add(state);
+            tempNewStates.put(stateCombo, newState);
+          }
         }
       }
       // copy the sub-partition into the new partition set
@@ -148,13 +179,16 @@ public class DFAReducer {
     // copy transitions
     for (String ns : this.reducedStates.keySet()) {
       for (String s : this.reducedStates.get(ns)) {
-        String [] transitions = this.getCombo(s).split("-");
+        String combo = this.getCombo(s);
+        String [] transitions = combo.split("-");
+        
         for (int i = 0; i < transitions.length; i++) {
           if (!transitions[i].equals("")) {
             minimized.addTransition(ns, transitions[i], this.original.getTransitionOpts().get(i));
+          } else {
+            minimized.addTransition(ns, ns, this.original.getTransitionOpts().get(i));
           }
         }
-        break;
       }
     }
     // copy transition options

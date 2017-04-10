@@ -23,7 +23,6 @@ public class NFA {
     // initialize queue
     ArrayList<String> queue = new ArrayList<String>();
     queue.add(dfa.getStartState());
-    dfa.addEndState(dfa.getStartState());
     Set<String> visited = new HashSet<String>();
     
     // iterate through queue of all possible combinations
@@ -48,7 +47,6 @@ public class NFA {
     }
     // set end states for DFA
     dfa.setEndStatesFromNFA(nfaGraph.getEndStates());
-    
     // get name mapping to use for refactoring names
     Map<String, String> nameMapping = new HashMap<String, String>();
     int i = 0;
